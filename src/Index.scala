@@ -23,5 +23,11 @@ object Index {
         val z = IntType("gridDim.z")
     }
 
-    val id = blockIdx.x * blockDim.x + threadIdx.x;
+    private val idxExpr = blockIdx.x * blockDim.x + threadIdx.x;
+
+    private val IDX_NAME = "idx"
+
+    def defineIdx = s"int $IDX_NAME = ${idxExpr.codeGen};\n"
+
+    val idx: IntType = IntType(IDX_NAME)
 }
