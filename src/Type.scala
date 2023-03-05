@@ -7,7 +7,8 @@ trait Typable {
 sealed trait Type extends Typable {
     val varName: String // name of the variable
 
-    def argName: String // name in the parameter list
+    def argsName: List[String] // names in the parameter list
+    // can have multiple elements, e.g., arrays need to be specified size
 
     def defName: String // name in variable definition, zero initialization
 }
@@ -19,7 +20,7 @@ class FloatType(val varName: String) extends ScalarType with PolyExpr[FloatType]
 
     override val refTypeName: String = s"$typeName*"
 
-    override def argName: String = s"$typeName $varName"
+    override def argsName: List[String] = List(s"$typeName $varName")
 
     override def defName: String = s"$typeName $varName = 0.0f;"
 
@@ -43,7 +44,7 @@ class IntType(val varName: String) extends ScalarType with PolyExpr[IntType] {
 
     override val refTypeName: String = s"$typeName*"
 
-    override def argName: String = s"$typeName $varName"
+    override def argsName: List[String] = List(s"$typeName $varName")
 
     override def defName: String = s"$typeName $varName = 0;"
 
@@ -62,4 +63,20 @@ class IntType(val varName: String) extends ScalarType with PolyExpr[IntType] {
     def >=(other: IntType): GE[IntType] = GE(this, other)
 }
 
-trait ArrayType[T <: ScalarType] extends Type
+trait ArrayType[T <: ScalarType] extends Type {
+    val varName: String
+    val size: PolyExpr[IntType]
+    val baseTypeName: String
+}
+
+class OneDimFloatArrayType(val varName: String)(val size: PolyExpr[IntType]) extends ArrayType[FloatType] {
+    val typeName: String = "float*"
+    val refTypeName: String = typeName
+    override val baseTypeName: String = "float"
+
+    def argsName: List[String] = List(s"float $varName[]", s"int ${varName}_size")
+
+    def defName: String = ???
+
+    def apply(index: PolyExpr[IntType]): ArrayAccess[FloatType] = ArrayAccess(this, index)
+}

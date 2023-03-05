@@ -10,5 +10,7 @@
     println(GlobalFunc("idx")()(Index.id).codeGen)
     println(DeviceFunc("add")(a, b)(a == b).codeGen)
     println(DeviceFunc("idx")()(Index.id).codeGen)
+    val arr = OneDimFloatArrayType("arr")(IntType("n"))
+    println(DeviceFunc("access")(arr)(arr(Index.id)).codeGen)
 }
 

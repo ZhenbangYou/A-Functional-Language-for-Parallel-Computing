@@ -52,6 +52,13 @@ case class Neg[T <: Type](srcA: PolyExpr[T]) extends PolyExpr[T] {
     override val refTypeName: String = srcA.refTypeName
 }
 
+case class ArrayAccess[T <: ScalarType](array: ArrayType[T], index: PolyExpr[IntType]) extends PolyExpr[T] {
+    def codeGen: String = s"${array.varName}[${index.codeGen}]"
+
+    override val typeName: String = array.baseTypeName
+    override val refTypeName: String = s"$typeName*"
+}
+
 trait BoolExpr extends Expr {
     def &&(other: BoolExpr): And = And(this, other)
 
