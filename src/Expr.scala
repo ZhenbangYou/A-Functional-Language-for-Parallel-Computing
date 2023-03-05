@@ -1,5 +1,8 @@
-sealed trait Expr {
+sealed trait Expr extends Typable {
     def codeGen: String
+
+    val typeName: String
+    val refTypeName: String
 }
 
 trait PolyExpr[T <: Type] extends Expr {
@@ -16,22 +19,37 @@ trait PolyExpr[T <: Type] extends Expr {
 
 case class Add[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
     override def codeGen: String = s"(${srcA.codeGen} + ${srcB.codeGen})"
+
+    override val typeName: String = srcA.typeName
+    override val refTypeName: String = srcA.refTypeName
 }
 
 case class Sub[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
     override def codeGen: String = s"(${srcA.codeGen} - ${srcB.codeGen})"
+
+    override val typeName: String = srcA.typeName
+    override val refTypeName: String = srcA.refTypeName
 }
 
 case class Mul[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
     override def codeGen: String = s"(${srcA.codeGen} * ${srcB.codeGen})"
+
+    override val typeName: String = srcA.typeName
+    override val refTypeName: String = srcA.refTypeName
 }
 
 case class Div[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
     override def codeGen: String = s"(${srcA.codeGen} / ${srcB.codeGen})"
+
+    override val typeName: String = srcA.typeName
+    override val refTypeName: String = srcA.refTypeName
 }
 
 case class Neg[T <: Type](srcA: PolyExpr[T]) extends PolyExpr[T] {
     override def codeGen: String = s"(-${srcA.codeGen})"
+
+    override val typeName: String = srcA.typeName
+    override val refTypeName: String = srcA.refTypeName
 }
 
 trait BoolExpr extends Expr {
@@ -40,6 +58,9 @@ trait BoolExpr extends Expr {
     def ||(other: BoolExpr): Or = Or(this, other)
 
     def unary_! : Not = Not(this)
+
+    override val typeName: String = "bool"
+    override val refTypeName: String = "bool*"
 }
 
 case class EQ[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {

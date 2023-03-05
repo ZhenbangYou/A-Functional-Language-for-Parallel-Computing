@@ -1,6 +1,10 @@
-sealed trait Type {
+trait Typable {
     val typeName: String
 
+    val refTypeName: String
+}
+
+sealed trait Type extends Typable {
     val varName: String // name of the variable
 
     def argName: String // name in the parameter list
@@ -12,6 +16,8 @@ trait ScalarType extends Type
 
 class FloatType(val varName: String) extends ScalarType with PolyExpr[FloatType] {
     override val typeName: String = "float"
+
+    override val refTypeName: String = "float*"
 
     override def argName: String = s"float $varName"
 

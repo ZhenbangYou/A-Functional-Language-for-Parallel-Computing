@@ -6,6 +6,6 @@
     val e = a + b + c
     println((a * b + c / d - (-a)).codeGen)
     println((a < b && d != c).codeGen)
-    println(Func("add")(List(a, b))(a + b).codeGen)
+    println(Func("add")(List(a, b))(a == b).codeGen)
 }
 
