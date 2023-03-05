@@ -2,17 +2,20 @@ sealed trait Type {
     val typeName: String
 
     val varName: String // name of the variable
-    val argName: String // name in the parameter list
-    val defName: String // name in variable definition, zero initialization
+
+    def argName: String // name in the parameter list
+
+    def defName: String // name in variable definition, zero initialization
 }
 
 trait ScalarType extends Type
 
-class FloatType(name: String) extends ScalarType with PolyExpr[FloatType] {
+class FloatType(val varName: String) extends ScalarType with PolyExpr[FloatType] {
     override val typeName: String = "float"
-    override val varName: String = name
-    override val argName: String = s"float $varName"
-    override val defName: String = s"float $varName = 0.0f;"
+
+    override def argName: String = s"float $varName"
+
+    override def defName: String = s"float $varName = 0.0f;"
 
     override def codeGen: String = varName
 

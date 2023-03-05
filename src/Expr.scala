@@ -2,7 +2,7 @@ sealed trait Expr {
     def codeGen: String
 }
 
-trait PolyExpr[T] extends Expr {
+trait PolyExpr[T <: Expr] extends Expr {
     def +(other: PolyExpr[T]): Add[T] = Add(this, other)
 
     def -(other: PolyExpr[T]): Sub[T] = Sub(this, other)
@@ -14,23 +14,23 @@ trait PolyExpr[T] extends Expr {
     def unary_- : Neg[T] = Neg(this)
 }
 
-case class Add[T](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
+case class Add[T <: Expr](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
     override def codeGen: String = s"(${srcA.codeGen} + ${srcB.codeGen})"
 }
 
-case class Sub[T](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
+case class Sub[T <: Expr](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
     override def codeGen: String = s"(${srcA.codeGen} - ${srcB.codeGen})"
 }
 
-case class Mul[T](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
+case class Mul[T <: Expr](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
     override def codeGen: String = s"(${srcA.codeGen} * ${srcB.codeGen})"
 }
 
-case class Div[T](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
+case class Div[T <: Expr](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
     override def codeGen: String = s"(${srcA.codeGen} / ${srcB.codeGen})"
 }
 
-case class Neg[T](srcA: PolyExpr[T]) extends PolyExpr[T] {
+case class Neg[T <: Expr](srcA: PolyExpr[T]) extends PolyExpr[T] {
     override def codeGen: String = s"(-${srcA.codeGen})"
 }
 
@@ -42,27 +42,27 @@ trait BoolExpr extends Expr {
     def unary_! : Not = Not(this)
 }
 
-case class EQ[T](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
+case class EQ[T <: Expr](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} == ${srcB.codeGen})"
 }
 
-case class NE[T](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
+case class NE[T <: Expr](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} != ${srcB.codeGen})"
 }
 
-case class LT[T](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
+case class LT[T <: Expr](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} < ${srcB.codeGen})"
 }
 
-case class LE[T](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
+case class LE[T <: Expr](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} <= ${srcB.codeGen})"
 }
 
-case class GT[T](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
+case class GT[T <: Expr](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} > ${srcB.codeGen})"
 }
 
-case class GE[T](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
+case class GE[T <: Expr](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} >= ${srcB.codeGen})"
 }
 
