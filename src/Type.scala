@@ -1,3 +1,5 @@
+import scala.language.implicitConversions
+
 trait Typable {
     val typeName: String
 
@@ -39,6 +41,8 @@ class FloatType(val varName: String) extends ScalarType with PolyExpr[FloatType]
     def >=(other: FloatType): GE[FloatType] = GE(this, other)
 }
 
+implicit def FloatConst(f: Float): FloatType = FloatType(f.toString)
+
 class IntType(val varName: String) extends ScalarType with PolyExpr[IntType] {
     override val typeName: String = "int"
 
@@ -62,6 +66,8 @@ class IntType(val varName: String) extends ScalarType with PolyExpr[IntType] {
 
     def >=(other: IntType): GE[IntType] = GE(this, other)
 }
+
+implicit def IntConst(i: Int): IntType = IntType(i.toString)
 
 trait ArrayType[T <: ScalarType] extends Type {
     val varName: String

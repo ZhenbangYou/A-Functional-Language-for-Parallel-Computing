@@ -1,4 +1,8 @@
-sealed trait Func
+sealed trait Func {
+    def codeGen: String
+
+    override def toString: String = codeGen
+}
 
 case class GlobalFunc[T <: Expr](name: String)(args: Type*)(body: T) extends Func {
     def codeGen: String = {

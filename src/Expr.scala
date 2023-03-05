@@ -3,6 +3,8 @@ sealed trait Expr extends Typable {
 
     val typeName: String
     val refTypeName: String
+
+    override def toString: String = codeGen
 }
 
 trait PolyExpr[T <: Type] extends Expr {
