@@ -4,7 +4,7 @@
     val c = FloatType("c")
     val d = FloatType("d")
     val e = a + b + c
-    println((a * b + c / d - (-a)))
+    println(a * b + c / d - (-a))
     println((a < b && d != c).codeGen)
     println(GlobalFunc("add")(a, b)(a == b))
     println(GlobalFunc("idx")()(Index.idx))

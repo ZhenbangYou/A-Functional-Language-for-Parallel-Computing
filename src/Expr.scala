@@ -17,6 +17,8 @@ trait PolyExpr[T <: Type] extends Expr {
     def /(other: PolyExpr[T]): Div[T] = Div(this, other)
 
     def unary_- : Neg[T] = Neg(this)
+
+    def unary_+ : PolyExpr[T] = this
 }
 
 case class Add[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
