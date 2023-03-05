@@ -1,0 +1,1 @@
+@main def main() = println("hello, functional programming!")
