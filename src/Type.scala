@@ -27,18 +27,6 @@ class FloatType(val varName: String) extends ScalarType with PolyExpr[FloatType]
     override def defName: String = s"$typeName $varName = 0.0f;"
 
     override def codeGen: String = varName
-
-    def ==(other: FloatType): EQ[FloatType] = EQ(this, other)
-
-    def !=(other: FloatType): NE[FloatType] = NE(this, other)
-
-    def <(other: FloatType): LT[FloatType] = LT(this, other)
-
-    def <=(other: FloatType): LE[FloatType] = LE(this, other)
-
-    def >(other: FloatType): GT[FloatType] = GT(this, other)
-
-    def >=(other: FloatType): GE[FloatType] = GE(this, other)
 }
 
 implicit def floatConst(f: Float): FloatType = FloatType(f.toString)
@@ -53,34 +41,22 @@ class IntType(val varName: String) extends ScalarType with PolyExpr[IntType] {
     override def defName: String = s"$typeName $varName = 0;"
 
     override def codeGen: String = varName
-
-    def ==(other: IntType): EQ[IntType] = EQ(this, other)
-
-    def !=(other: IntType): NE[IntType] = NE(this, other)
-
-    def <(other: IntType): LT[IntType] = LT(this, other)
-
-    def <=(other: IntType): LE[IntType] = LE(this, other)
-
-    def >(other: IntType): GT[IntType] = GT(this, other)
-
-    def >=(other: IntType): GE[IntType] = GE(this, other)
 }
 
 implicit def intConst(i: Int): IntType = IntType(i.toString)
 
 trait ArrayType[T <: ScalarType] extends Type {
     val varName: String
-    val size: PolyExpr[IntType]
+    val size: IntType
     val baseTypeName: String
 }
 
-class OneDimFloatArrayType(val varName: String)(val size: PolyExpr[IntType]) extends ArrayType[FloatType] {
+class OneDimFloatArrayType(val varName: String)(val size: IntType) extends ArrayType[FloatType] {
     val typeName: String = "float*"
     val refTypeName: String = typeName
     override val baseTypeName: String = "float"
 
-    def argsName: List[String] = List(s"float $varName[]", s"int ${varName}_size")
+    def argsName: List[String] = List(s"float $varName[]", s"int ${size.varName}")
 
     def defName: String = ???
 
