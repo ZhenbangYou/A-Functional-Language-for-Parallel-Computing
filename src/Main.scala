@@ -6,6 +6,9 @@
     val e = a + b + c
     println((a * b + c / d - (-a)).codeGen)
     println((a < b && d != c).codeGen)
-    println(Func("add")(List(a, b))(a == b).codeGen)
+    println(GlobalFunc("add")(a, b)(a == b).codeGen)
+    println(GlobalFunc("idx")()(Index.id).codeGen)
+    println(DeviceFunc("add")(a, b)(a == b).codeGen)
+    println(DeviceFunc("idx")()(Index.id).codeGen)
 }
 
