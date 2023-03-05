@@ -19,6 +19,18 @@ trait PolyExpr[T <: Type] extends Expr {
     def unary_- : Neg[T] = Neg(this)
 
     def unary_+ : PolyExpr[T] = this
+
+    def ==(other: PolyExpr[T]): EQ[T] = EQ(this, other)
+
+    def !=(other: PolyExpr[T]): NE[T] = NE(this, other)
+
+    def <(other: PolyExpr[T]): LT[T] = LT(this, other)
+
+    def <=(other: PolyExpr[T]): LE[T] = LE(this, other)
+
+    def >(other: PolyExpr[T]): GT[T] = GT(this, other)
+
+    def >=(other: PolyExpr[T]): GE[T] = GE(this, other)
 }
 
 case class Add[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -108,4 +120,12 @@ case class Or(srcA: BoolExpr, srcB: BoolExpr) extends BoolExpr {
 
 case class Not(srcA: BoolExpr) extends BoolExpr {
     override def codeGen: String = s"(!${srcA.codeGen})"
+}
+
+case class If[T <: Type](cond: BoolExpr)(thenBody: PolyExpr[T])(elseBody: PolyExpr[T]) extends PolyExpr[T] {
+    override val typeName: String = thenBody.typeName
+    override val refTypeName: String = thenBody.refTypeName
+
+    override def codeGen: String =
+        s"${cond.codeGen} ? ${thenBody.codeGen} : ${elseBody.codeGen}"
 }
