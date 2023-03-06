@@ -28,6 +28,17 @@ If I do not do well, this will still be a *glorious failure" (quoted from the pr
 
 I will keep updating this project even after the winter quarter of 2023.
 
+## Related Work
+### Industrial Strength
+1. CUDA Thrust (https://docs.nvidia.com/cuda/thrust/): performant, hard to use
+2. OpenAI Triton (https://openai.com/research/triton): not functional enough, still too imperative
+3. Scala Parallel Collections (https://docs.scala-lang.org/overviews/parallel-collections/overview.html): easy to use, only supporting CPU multithreading
+### Academic Work (Still Incomplete)
+
 ## Tough Things
 1. Low-level IR close to CUDA
+    - Two IRs are needed: 
+      - high-level, basically abstract syntax tree (AST) of the source language, expression-oriented
+      - low-level, close to CUDA, statement-oriented
 2. Expression-oriented style in FP to statement-oriented style in CUDA
+3. Achieving high performance while maintaining functional and easy-to-use APIs (previous work sacrifice the latter for the former)
