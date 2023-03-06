@@ -42,3 +42,6 @@ I will keep updating this project even after the winter quarter of 2023.
       - low-level, close to CUDA, statement-oriented
 2. Expression-oriented style in FP to statement-oriented style in CUDA
 3. Achieving high performance while maintaining functional and easy-to-use APIs (previous work sacrifice the latter for the former)
+
+## Requirements
+Scala 3 (no other dependency required)
