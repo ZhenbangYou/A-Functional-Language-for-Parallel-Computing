@@ -66,5 +66,10 @@
             arrA.zipWith(arrB)(_ + _)
         }
     )
+    println(
+        GlobalFunc("add")(arrA, arrB) {
+            arrA + arrB
+        }
+    )
 }
 

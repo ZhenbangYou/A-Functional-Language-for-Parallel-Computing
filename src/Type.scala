@@ -62,7 +62,38 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
 
     def apply(index: PolyExpr[IntType]): ArrayAccess[FloatType] = ArrayAccess(this, index)
 
-    //def +(other: OneDimFloatArrayType):TmpOneDimFloatArrayType = zipWith(other)((a, b) => a + b)
+    def map(f: PolyExpr[FloatType] => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
+        val element = this (Index.idx)
+        TmpOneDimFloatArrayType(f(element))(size)
+    }
+
+    def zipWith(other: OneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
+        TmpOneDimFloatArrayType(f(this (Index.idx), other(Index.idx)))(size)
+    }
+
+    def zipWith(other: TmpOneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
+        TmpOneDimFloatArrayType(f(this (Index.idx), other.element))(size)
+    }
+
+    def +(other: OneDimFloatArrayType) = zipWith(other)(_ + _)
+
+    def -(other: OneDimFloatArrayType) = zipWith(other)(_ - _)
+
+    def *(other: OneDimFloatArrayType) = zipWith(other)(_ * _)
+
+    def /(other: OneDimFloatArrayType) = zipWith(other)(_ / _)
+
+    def +(other: TmpOneDimFloatArrayType) = zipWith(other)(_ + _)
+
+    def -(other: TmpOneDimFloatArrayType) = zipWith(other)(_ - _)
+
+    def *(other: TmpOneDimFloatArrayType) = zipWith(other)(_ * _)
+
+    def /(other: TmpOneDimFloatArrayType) = zipWith(other)(_ / _)
+
+    def unary_+ = this
+
+    def unary_- = map(-_)
 }
 
 class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntType) extends ArrayType[FloatType] {
@@ -74,4 +105,34 @@ class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntTyp
     def argsName: List[String] = List(s"float $varName[]", s"int ${size.varName}")
 
     def defName: String = ???
+
+    def map(f: PolyExpr[FloatType] => PolyExpr[FloatType]): TmpOneDimFloatArrayType = TmpOneDimFloatArrayType(f(element))(size)
+
+    def zipWith(other: OneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
+        TmpOneDimFloatArrayType(f(element, other(Index.idx)))(size)
+    }
+
+    def zipWith(other: TmpOneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
+        TmpOneDimFloatArrayType(f(element, other.element))(size)
+    }
+
+    def +(other: OneDimFloatArrayType) = zipWith(other)(_ + _)
+
+    def -(other: OneDimFloatArrayType) = zipWith(other)(_ - _)
+
+    def *(other: OneDimFloatArrayType) = zipWith(other)(_ * _)
+
+    def /(other: OneDimFloatArrayType) = zipWith(other)(_ / _)
+
+    def +(other: TmpOneDimFloatArrayType) = zipWith(other)(_ + _)
+
+    def -(other: TmpOneDimFloatArrayType) = zipWith(other)(_ - _)
+
+    def *(other: TmpOneDimFloatArrayType) = zipWith(other)(_ * _)
+
+    def /(other: TmpOneDimFloatArrayType) = zipWith(other)(_ / _)
+
+    def unary_+ = this
+
+    def unary_- = map(-_)
 }
