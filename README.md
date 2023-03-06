@@ -10,6 +10,7 @@ There are three main goals in the design of programming languages (PLs):
 While modern **statically typed functional languages** like *ML, Haskell, Scala* do well in the last two, and some *cumbersome* languages like *C++, Rust* are good at the first, there is still a huge gap between this two kinds.
 
 I believe this gap can be bridged by compilers -- with the effort of PL and compiler people, we will certainly have a language (maybe domain-specific, but still general enough to matter) that achieves all the three goals.
+Hopefully, more and more research work is emerging in related fields.
 
 To explore the feasibility, this project designs a DSL embedded in Scala, and produces CUDA code.
 If the idea is feasible, we can have a language portable to different hardware platform, but this project targets only CUDA at the moment, since it is widely available and its auto-scheduling is a well-known hard problem.
