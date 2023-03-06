@@ -11,6 +11,11 @@ While modern **statically typed functional languages** like *ML, Haskell, Scala*
 
 I believe this gap can be bridged by compilers -- with the effort of PL and compiler people, we will certainly have a language (maybe domain-specific, but still general enough to matter) that achieves all the three goals.
 
+To explore the feasibility, this project designs a DSL embedded in Scala, and produces CUDA code.
+If the idea is feasible, we can have a language portable to different hardware platform, but this project targets only CUDA at the moment, since it is widely available and its auto-scheduling is a well-known hard problem.
+
+***"We choose to go to the moon, not because it's easy, but because it's hard."***
+
 This DSL involves three things I am the most fascinated about:
 1. Performance engineering and parallel computing
 2. Compiler development
