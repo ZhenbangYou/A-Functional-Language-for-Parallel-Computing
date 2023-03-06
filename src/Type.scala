@@ -94,6 +94,14 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
     def unary_+ = this
 
     def unary_- = map(-_)
+
+    def +(other: FloatType) = map(_ + other)
+
+    def -(other: FloatType) = map(_ - other)
+
+    def *(other: FloatType) = map(_ * other)
+
+    def /(other: FloatType) = map(_ / other)
 }
 
 class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntType) extends ArrayType[FloatType] {
@@ -135,4 +143,23 @@ class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntTyp
     def unary_+ = this
 
     def unary_- = map(-_)
+
+    def +(other: FloatType) = map(_ + other)
+
+    def -(other: FloatType) = map(_ - other)
+
+    def *(other: FloatType) = map(_ * other)
+
+    def /(other: FloatType) = map(_ / other)
+}
+
+extension (f: FloatType) {
+    def +(other: OneDimFloatArrayType) = other.map(f + _)
+    def -(other: OneDimFloatArrayType) = other.map(f - _)
+    def *(other: OneDimFloatArrayType) = other.map(f * _)
+    def /(other: OneDimFloatArrayType) = other.map(f / _)
+    def +(other: TmpOneDimFloatArrayType) = other.map(f + _)
+    def -(other: TmpOneDimFloatArrayType) = other.map(f - _)
+    def *(other: TmpOneDimFloatArrayType) = other.map(f * _)
+    def /(other: TmpOneDimFloatArrayType) = other.map(f / _)
 }

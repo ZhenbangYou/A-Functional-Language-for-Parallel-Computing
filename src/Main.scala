@@ -71,5 +71,13 @@
             arrA + arrB
         }
     )
+    val alpha = FloatType("alpha")
+    val x = OneDimFloatArrayType("x")(n)
+    val y = OneDimFloatArrayType("y")(n)
+    println(
+        GlobalFunc("saxpy")(alpha, x, y) {
+            alpha * x + y
+        }
+    )
 }
 
