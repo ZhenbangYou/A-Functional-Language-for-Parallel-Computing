@@ -24,7 +24,7 @@ class FloatType(val varName: String) extends ScalarType with PolyExpr[FloatType]
 
     override def argsName: List[String] = List(s"$typeName $varName")
 
-    override def defName: String = s"$typeName $varName = 0.0f;"
+    override def defName: String = s"$typeName $varName = 0.0f;\n"
 
     override def codeGen: String = varName
 }
@@ -38,7 +38,7 @@ class IntType(val varName: String) extends ScalarType with PolyExpr[IntType] {
 
     override def argsName: List[String] = List(s"$typeName $varName")
 
-    override def defName: String = s"$typeName $varName = 0;"
+    override def defName: String = s"$typeName $varName = 0;\n"
 
     override def codeGen: String = varName
 }
