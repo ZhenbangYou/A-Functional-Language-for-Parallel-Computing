@@ -1,3 +1,5 @@
+import scala.language.implicitConversions
+
 sealed trait Expr extends Typable {
     def codeGen: String
 
@@ -129,3 +131,12 @@ case class If[T <: Type](cond: BoolExpr)(thenBody: PolyExpr[T])(elseBody: PolyEx
     override def codeGen: String =
         s"${cond.codeGen} ? ${thenBody.codeGen} : ${elseBody.codeGen}"
 }
+
+case class TmpFloatArrayAccess(array: TmpOneDimFloatArrayType) extends PolyExpr[FloatType] {
+    def codeGen: String = array.element.codeGen
+
+    override val typeName: String = array.baseTypeName
+    override val refTypeName: String = s"$typeName*"
+}
+
+implicit def tmpArray(t: TmpOneDimFloatArrayType): TmpFloatArrayAccess = TmpFloatArrayAccess(t)

@@ -46,5 +46,25 @@
             }
         )
     )
+    println(
+        DeviceFunc("plus")(arrA) {
+            arrA.map(x => x + 1)
+        }
+    )
+    println(
+        GlobalFunc("plus")(arrA) {
+            arrA.map(x => x + 1)
+        }
+    )
+    println(
+        GlobalFunc("add")(arrA, arrB) {
+            arrA.zipWith(arrB)(_ + _)
+        }
+    )
+    println(
+        DeviceFunc("add")(arrA, arrB) {
+            arrA.zipWith(arrB)(_ + _)
+        }
+    )
 }
 

@@ -61,4 +61,17 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
     def defName: String = ???
 
     def apply(index: PolyExpr[IntType]): ArrayAccess[FloatType] = ArrayAccess(this, index)
+
+    //def +(other: OneDimFloatArrayType):TmpOneDimFloatArrayType = zipWith(other)((a, b) => a + b)
+}
+
+class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntType) extends ArrayType[FloatType] {
+    val typeName: String = "float*"
+    val refTypeName: String = typeName
+    override val baseTypeName: String = "float"
+    override val varName: String = element.codeGen
+
+    def argsName: List[String] = List(s"float $varName[]", s"int ${size.varName}")
+
+    def defName: String = ???
 }
