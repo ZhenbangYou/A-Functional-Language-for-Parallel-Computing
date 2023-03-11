@@ -17,6 +17,6 @@ case class IfStmt(cond: BoolExpr)(thenBody: Statement)(elseBody: Statement) exte
 
 }
 
-case class whileStmt(cond: BoolExpr)(body: Statement) extends Statement {
+case class WhileStmt(cond: BoolExpr)(body: Statement) extends Statement {
     def codeGen: String = s"while (${cond.codeGen}) {\n\t${body.codeGen}}\n"
 }
