@@ -38,10 +38,11 @@ I will keep updating this project even after the winter quarter of 2023.
 ## Tough Things
 1. Low-level IR close to CUDA
     - Two IRs are needed: 
-      - high-level, basically abstract syntax tree (AST) of the source language, expression-oriented
-      - low-level, close to CUDA, statement-oriented
-2. Expression-oriented style in FP to statement-oriented style in CUDA
-3. Achieving high performance while maintaining functional and easy-to-use APIs (previous work sacrifice the latter for the former)
+      - high-level, basically abstract syntax tree (AST) of the source language, expression-oriented;
+      - low-level, close to CUDA, statement-oriented.
+2. Expression-oriented style in FP to statement-oriented style in CUDA.
+3. Achieving high performance while maintaining functional and easy-to-use APIs (previous work sacrifice the latter for the former, but I will try the other way -- always keeping the APIs functional and easy-to-use, and making attempts to improve its performance).
+4. In CUDA, synchronization can only occur within the same block.
 
 ## Requirements
 Scala 3 (no other dependency required)
