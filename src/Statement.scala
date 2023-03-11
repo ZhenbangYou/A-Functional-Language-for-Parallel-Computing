@@ -4,7 +4,7 @@ sealed trait Statement {
     override def toString: String = codeGen
 }
 
-case class Assignment[T <: Expr](val lhs: T, val rhs: T) extends Statement {
+case class Assignment[T <: Expr](lhs: T, rhs: T) extends Statement {
     def codeGen = s"${lhs.codeGen} = ${rhs.codeGen};\n"
 }
 

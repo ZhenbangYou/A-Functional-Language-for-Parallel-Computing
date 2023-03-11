@@ -6,9 +6,11 @@
     val e = a + b + c
     println(a * b + c / d - (-a))
     println((a < b && d != c).codeGen)
-    println(GlobalFunc("add")(a, b)(a == b))
+    println(GlobalFunc("add")(a, b)(a + b))
+    println(DeviceFunc("add")(a, b)(a + b))
+    println(GlobalFunc("eq")(a, b)(a == b))
     println(GlobalFunc("idx")()(Index.idx))
-    println(DeviceFunc("add")(a, b)(a == b))
+    println(DeviceFunc("eq")(a, b)(a == b))
     println(DeviceFunc("idx")()(Index.idx))
     val arr = OneDimFloatArrayType("arr")(IntType("n"))
     println(DeviceFunc("access")(arr)(arr(Index.idx)))

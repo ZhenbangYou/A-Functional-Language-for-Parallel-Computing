@@ -7,6 +7,10 @@ sealed trait Expr extends Typable {
     val refTypeName: String
 
     override def toString: String = codeGen
+
+    def genStatements: Vector[String]
+
+    def getResult: String
 }
 
 trait PolyExpr[T <: Type] extends Expr {
@@ -40,6 +44,18 @@ case class Add[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
 
     override val typeName: String = srcA.typeName
     override val refTypeName: String = srcA.refTypeName
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        srcA.genStatements ++
+            srcB.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = ${srcA.getResult} + ${srcB.getResult};\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 case class Sub[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -47,6 +63,18 @@ case class Sub[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
 
     override val typeName: String = srcA.typeName
     override val refTypeName: String = srcA.refTypeName
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        srcA.genStatements ++
+            srcB.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = ${srcA.getResult} - ${srcB.getResult};\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 case class Mul[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -54,6 +82,18 @@ case class Mul[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
 
     override val typeName: String = srcA.typeName
     override val refTypeName: String = srcA.refTypeName
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        srcA.genStatements ++
+            srcB.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = ${srcA.getResult} * ${srcB.getResult};\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 case class Div[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -61,6 +101,18 @@ case class Div[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
 
     override val typeName: String = srcA.typeName
     override val refTypeName: String = srcA.refTypeName
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        srcA.genStatements ++
+            srcB.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = ${srcA.getResult} / ${srcB.getResult};\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 case class Neg[T <: Type](srcA: PolyExpr[T]) extends PolyExpr[T] {
@@ -68,6 +120,17 @@ case class Neg[T <: Type](srcA: PolyExpr[T]) extends PolyExpr[T] {
 
     override val typeName: String = srcA.typeName
     override val refTypeName: String = srcA.refTypeName
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        srcA.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = -${srcA.getResult};\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 case class ArrayAccess[T <: ScalarType](array: ArrayType[T], index: PolyExpr[IntType]) extends PolyExpr[T] {
@@ -75,6 +138,17 @@ case class ArrayAccess[T <: ScalarType](array: ArrayType[T], index: PolyExpr[Int
 
     override val typeName: String = array.baseTypeName
     override val refTypeName: String = s"$typeName*"
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        index.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = ${array.varName}[${index.getResult}];\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 trait BoolExpr extends Expr {
@@ -90,38 +164,145 @@ trait BoolExpr extends Expr {
 
 case class EQ[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} == ${srcB.codeGen})"
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        srcA.genStatements ++
+            srcB.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = ${srcA.getResult} == ${srcB.getResult};\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 case class NE[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} != ${srcB.codeGen})"
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        srcA.genStatements ++
+            srcB.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = ${srcA.getResult} != ${srcB.getResult};\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 case class LT[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} < ${srcB.codeGen})"
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        srcA.genStatements ++
+            srcB.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = ${srcA.getResult} < ${srcB.getResult};\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 case class LE[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} <= ${srcB.codeGen})"
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        srcA.genStatements ++
+            srcB.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = ${srcA.getResult} <= ${srcB.getResult};\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 case class GT[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} > ${srcB.codeGen})"
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        srcA.genStatements ++
+            srcB.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = ${srcA.getResult} > ${srcB.getResult};\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 case class GE[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} >= ${srcB.codeGen})"
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        srcA.genStatements ++
+            srcB.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = ${srcA.getResult} >= ${srcB.getResult};\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 case class And(srcA: BoolExpr, srcB: BoolExpr) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} && ${srcB.codeGen})"
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        srcA.genStatements ++
+            srcB.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = ${srcA.getResult} && ${srcB.getResult};\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 case class Or(srcA: BoolExpr, srcB: BoolExpr) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} || ${srcB.codeGen})"
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        srcA.genStatements ++
+            srcB.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = ${srcA.getResult} || ${srcB.getResult};\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 case class Not(srcA: BoolExpr) extends BoolExpr {
     override def codeGen: String = s"(!${srcA.codeGen})"
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        srcA.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = !${srcA.getResult};\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 case class If[T <: Type](cond: BoolExpr)(thenBody: PolyExpr[T])(elseBody: PolyExpr[T]) extends PolyExpr[T] {
@@ -130,6 +311,17 @@ case class If[T <: Type](cond: BoolExpr)(thenBody: PolyExpr[T])(elseBody: PolyEx
 
     override def codeGen: String =
         s"${cond.codeGen} ? ${thenBody.codeGen} : ${elseBody.codeGen}"
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] =
+        cond.genStatements ++
+            Vector(
+                s"$typeName $resultName;\n",
+                s"$resultName = ${cond.getResult} ? ${thenBody.codeGen} : ${elseBody.codeGen};\n"
+            )
+
+    override def getResult: String = resultName
 }
 
 case class TmpFloatArrayAccess(array: TmpOneDimFloatArrayType) extends PolyExpr[FloatType] {
@@ -137,6 +329,12 @@ case class TmpFloatArrayAccess(array: TmpOneDimFloatArrayType) extends PolyExpr[
 
     override val typeName: String = array.baseTypeName
     override val refTypeName: String = s"$typeName*"
+
+    private val resultName = TemporaryName()
+
+    override def genStatements: Vector[String] = Vector()
+
+    override def getResult: String = resultName
 }
 
 implicit def tmpArray(t: TmpOneDimFloatArrayType): TmpFloatArrayAccess = TmpFloatArrayAccess(t)
