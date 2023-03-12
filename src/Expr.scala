@@ -37,6 +37,8 @@ trait PolyExpr[T <: Type] extends Expr with NewInstance[T] {
     def genStatements: Vector[Statement]
 
     def getResult: T
+
+    val conditions: Set[BoolExpr]
 }
 
 case class Add[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -55,6 +57,8 @@ case class Add[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
         )
 
     override def getResult: T = result
+
+    override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
 }
 
 case class Sub[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -73,6 +77,8 @@ case class Sub[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
         )
 
     override def getResult: T = result
+
+    override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
 }
 
 case class Mul[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -91,6 +97,8 @@ case class Mul[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
         )
 
     override def getResult: T = result
+
+    override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
 }
 
 case class Div[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -109,6 +117,8 @@ case class Div[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
         )
 
     override def getResult: T = result
+
+    override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
 }
 
 case class Neg[T <: Type](srcA: PolyExpr[T]) extends PolyExpr[T] {
@@ -127,6 +137,8 @@ case class Neg[T <: Type](srcA: PolyExpr[T]) extends PolyExpr[T] {
         )
 
     override def getResult: T = result
+
+    override val conditions: Set[BoolExpr] = srcA.conditions
 }
 
 case class ArrayAccess[T <: ScalarType with NewInstance[T]](array: ArrayType[T], index: PolyExpr[IntType]) extends PolyExpr[T] {
@@ -148,6 +160,8 @@ case class ArrayAccess[T <: ScalarType with NewInstance[T]](array: ArrayType[T],
         )
 
     override def getResult: T = result
+
+    override val conditions: Set[BoolExpr] = index.conditions + (index < array.size)
 }
 
 trait BoolExpr extends Expr {
@@ -215,6 +229,8 @@ case class If[T <: Type](cond: BoolExpr)(thenBody: PolyExpr[T])(elseBody: PolyEx
         )
 
     override def getResult: T = result
+
+    override val conditions: Set[BoolExpr] = thenBody.conditions | elseBody.conditions
 }
 
 case class TmpFloatArrayAccess(array: TmpOneDimFloatArrayType) extends PolyExpr[FloatType] {
@@ -233,6 +249,9 @@ case class TmpFloatArrayAccess(array: TmpOneDimFloatArrayType) extends PolyExpr[
         )
 
     override def getResult: FloatType = result
+
+    // TODO
+    override val conditions: Set[BoolExpr] = Set()
 }
 
 implicit def tmpArray(t: TmpOneDimFloatArrayType): TmpFloatArrayAccess = TmpFloatArrayAccess(t)

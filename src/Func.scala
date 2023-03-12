@@ -12,11 +12,22 @@ case class GlobalFunc[T <: Type](name: String)(args: Type*)(body: PolyExpr[T]) e
         val namesInArgs = args.map(_.argsName.head)
         val sizeInArgs = args.filter(_.argsName.length == 2).map(_.argsName(1)).toSet.toList
         val argList = (namesInArgs ++ sizeInArgs :+ s"$resultRefType $resultArg").reduce((a, b) => s"$a, $b")
-        s"""__global__ void $name($argList) {
-           |\t${Index.defineIdx.codeGen.stripTrailing}
-           |${statements2String(body.genStatements, "\t").stripTrailing}
-           |\t${resultAddress} = ${body.getResult.varName};
-           |}""".stripMargin
+        if (body.conditions.isEmpty)
+            s"""__global__ void $name($argList) {
+               |\t${Index.defineIdx.codeGen.stripTrailing}
+               |${statements2String(body.genStatements, "\t").stripTrailing}
+               |\t$resultAddress = ${body.getResult.varName};
+               |}""".stripMargin
+        else {
+            val cond = body.conditions.map(_.codeGen).reduce((a, b) => a + " && " + b)
+            s"""__global__ void $name($argList) {
+               |\t${Index.defineIdx.codeGen.stripTrailing}
+               |${statements2String(body.genStatements, "\t").stripTrailing}
+               |\tif $cond {
+               |\t\t$resultAddress = ${body.getResult.varName};
+               |\t}
+               |}""".stripMargin
+        }
     }
 }
 
