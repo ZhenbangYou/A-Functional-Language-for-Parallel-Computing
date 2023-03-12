@@ -141,7 +141,10 @@ case class ArrayAccess[T <: ScalarType with NewInstance[T]](array: ArrayType[T],
 
     override def genStatements: Vector[Statement] =
         index.genStatements ++ Vector(
-            InitializedDeclaration(result, array(index.getResult))
+            Declaration(result),
+            IfThen(index < array.size) {
+                Assignment(result.asInstanceOf[PolyExpr[T]], array(index.getResult))
+            }
         )
 
     override def getResult: T = result
@@ -206,7 +209,10 @@ case class If[T <: Type](cond: BoolExpr)(thenBody: PolyExpr[T])(elseBody: PolyEx
     private val result = thenBody.newInstance
 
     override def genStatements: Vector[Statement] =
-        Vector(IfStmt(cond)(thenBody.genStatements)(elseBody.genStatements))
+        Vector(
+            Declaration(result),
+            Ternary(result.asInstanceOf[PolyExpr[T]])(cond)(thenBody)(elseBody)
+        )
 
     override def getResult: T = result
 }

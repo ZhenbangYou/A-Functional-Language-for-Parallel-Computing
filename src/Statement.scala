@@ -16,27 +16,39 @@ case class InitializedDeclaration[T <: Type](variable: T, initVal: PolyExpr[T]) 
     def codeGen: String = s"${variable.defName.split('=').head} = ${initVal.codeGen};\n"
 }
 
-case class IfStmt(cond: BoolExpr)(thenBody: Vector[Statement])(elseBody: Vector[Statement]) extends Statement {
+case class Ternary[T <: Type](dst: PolyExpr[T])(cond: BoolExpr)(trueBranch: PolyExpr[T])(falseBranch: PolyExpr[T]) extends Statement {
+    def codeGen: String = s"${dst.codeGen} = ${cond.codeGen} ? ${trueBranch.codeGen} : ${falseBranch.codeGen};\n"
+}
+
+case class IfThen(cond: BoolExpr)(thenBody: Statement*) extends Statement {
     def codeGen: String =
         s"""if ${cond.codeGen} {
-           |${statements2String(thenBody, "\t").stripTrailing}
-           |} else {
-           |${statements2String(elseBody, " \t").stripTrailing}
+           |${statements2String(thenBody.toVector, "\t").stripTrailing}
            |}""".stripMargin
 
 }
 
-case class WhileLoop(cond: BoolExpr)(body: Vector[Statement]) extends Statement {
+case class IfThenElse(cond: BoolExpr)(thenBody: Statement*)(elseBody: Statement*) extends Statement {
+    def codeGen: String =
+        s"""if ${cond.codeGen} {
+           |${statements2String(thenBody.toVector, "\t").stripTrailing}
+           |} else {
+           |${statements2String(elseBody.toVector, " \t").stripTrailing}
+           |}""".stripMargin
+
+}
+
+case class WhileLoop(cond: BoolExpr)(body: Statement*) extends Statement {
     def codeGen: String =
         s"""while ${cond.codeGen} {
-           |${statements2String(body, "\t").stripTrailing}
+           |${statements2String(body.toVector, "\t").stripTrailing}
            |}""".stripMargin
 }
 
-case class For(init: Statement, cond: BoolExpr, post: Statement)(body: Vector[Statement]) extends Statement {
+case class For(init: Statement, cond: BoolExpr, post: Statement)(body: Statement*) extends Statement {
     override def codeGen: String =
         s"""for (${init.codeGen}; ${cond.codeGen}; ${post.codeGen}) {
-           |${statements2String(body, "\t")}
+           |${statements2String(body.toVector, "\t")}
            |}""".stripMargin
 }
 
