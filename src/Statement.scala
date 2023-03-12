@@ -5,7 +5,7 @@ sealed trait Statement {
 }
 
 case class Assignment[T <: Type](lhs: T, rhs: PolyExpr[T]) extends Statement {
-    def codeGen = s"${lhs.varName} = ${rhs.codeGen};\n"
+    def codeGen: String = s"${lhs.varName} = ${rhs.codeGen};\n"
 }
 
 case class Declaration[T <: Type](variable: T) extends Statement {
@@ -52,7 +52,7 @@ case class For(init: Statement, cond: BoolExpr, post: Statement)(body: Statement
            |}""".stripMargin
 }
 
-def statements2String(statements: Vector[Statement], prepend: String): String =
+def statements2String(statements: Vector[Statement], prepend: String = ""): String =
     statements.map(x => s"${
         val xs = x.codeGen.split('\n')
         val prepended = xs.map(prepend + _ + '\n')

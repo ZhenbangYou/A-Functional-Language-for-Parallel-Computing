@@ -78,5 +78,10 @@
             alpha * x + y
         }
     )
+    println(
+        GlobalFunc("shift")(x) {
+            x.map(y => x(Index.idx + 1))
+        }
+    )
 }
 

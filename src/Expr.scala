@@ -246,10 +246,13 @@ case class TmpFloatArrayAccess(array: TmpOneDimFloatArrayType) extends PolyExpr[
 
     private val result = array.newBaseTypeInstance
 
-    override def genStatements: Vector[Statement] =
+    override def genStatements: Vector[Statement] = {
+        val stmts = array.element.genStatements :+ Assignment(result, array.element.getResult)
         Vector(
-            InitializedDeclaration(result, array.element)
+            Declaration(result),
+            IfThen(array.index < array.size)(stmts: _*)
         )
+    }
 
     override def getResult: FloatType = result
 
