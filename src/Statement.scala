@@ -5,10 +5,7 @@ sealed trait Statement {
 }
 
 case class Assignment[T <: Expr](lhs: T, rhs: T) extends Statement {
-    def codeGen = s"${lhs.codeGen} = ${
-        val origin = rhs.codeGen
-        origin.substring(1, origin.length - 1)
-    };\n"
+    def codeGen = s"${lhs.codeGen} = ${rhs.codeGen};\n"
 }
 
 case class Declaration[T <: Type](variable: T) extends Statement {
@@ -16,10 +13,7 @@ case class Declaration[T <: Type](variable: T) extends Statement {
 }
 
 case class InitializedDeclaration[T <: Type](variable: T, initVal: PolyExpr[T]) extends Statement {
-    def codeGen: String = s"${variable.defName.split('=').head} = ${
-        val origin = initVal.codeGen
-        origin.substring(1, origin.length - 1)
-    };\n"
+    def codeGen: String = s"${variable.defName.split('=').head} = ${initVal.codeGen};\n"
 }
 
 case class Ternary[T <: Type](dst: PolyExpr[T])(cond: BoolExpr)(trueBranch: PolyExpr[T])(falseBranch: PolyExpr[T]) extends Statement {

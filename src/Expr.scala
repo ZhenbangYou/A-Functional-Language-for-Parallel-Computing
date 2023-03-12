@@ -222,11 +222,14 @@ case class If[T <: Type](cond: BoolExpr)(thenBody: PolyExpr[T])(elseBody: PolyEx
 
     private val result = thenBody.newInstance
 
-    override def genStatements: Vector[Statement] =
+    override def genStatements: Vector[Statement] = {
+        val thenStmts = thenBody.genStatements :+ Assignment(result.asInstanceOf[PolyExpr[T]], thenBody.getResult.asInstanceOf[PolyExpr[T]])
+        val elseStmts = elseBody.genStatements :+ Assignment(result.asInstanceOf[PolyExpr[T]], elseBody.getResult.asInstanceOf[PolyExpr[T]])
         Vector(
             Declaration(result),
-            Ternary(result.asInstanceOf[PolyExpr[T]])(cond)(thenBody)(elseBody)
+            IfThenElse(cond)(thenStmts: _*)(elseStmts: _*)
         )
+    }
 
     override def getResult: T = result
 
