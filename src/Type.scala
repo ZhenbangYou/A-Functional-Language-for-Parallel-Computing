@@ -86,15 +86,15 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
 
     def map(f: PolyExpr[FloatType] => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
         val element = this (Index.idx)
-        TmpOneDimFloatArrayType(f(element))(size)
+        TmpOneDimFloatArrayType(f(element))(size)(Index.idx)
     }
 
     def zipWith(other: OneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
-        TmpOneDimFloatArrayType(f(this (Index.idx), other(Index.idx)))(size)
+        TmpOneDimFloatArrayType(f(this (Index.idx), other(Index.idx)))(size)(Index.idx)
     }
 
     def zipWith(other: TmpOneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
-        TmpOneDimFloatArrayType(f(this (Index.idx), other.element))(size)
+        TmpOneDimFloatArrayType(f(this (Index.idx), other.element))(size)(Index.idx)
     }
 
     def +(other: OneDimFloatArrayType) = zipWith(other)(_ + _)
@@ -126,7 +126,7 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
     def /(other: FloatType) = map(_ / other)
 }
 
-class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntType) extends ArrayType[FloatType] {
+class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntType)(val index: PolyExpr[IntType]) extends ArrayType[FloatType] {
     val typeName: String = "float*"
     val refTypeName: String = typeName
     override val baseTypeName: String = "float"
@@ -140,14 +140,14 @@ class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntTyp
 
     override def newBaseTypeInstance: FloatType = FloatType(TemporaryName())
 
-    def map(f: PolyExpr[FloatType] => PolyExpr[FloatType]): TmpOneDimFloatArrayType = TmpOneDimFloatArrayType(f(element))(size)
+    def map(f: PolyExpr[FloatType] => PolyExpr[FloatType]): TmpOneDimFloatArrayType = TmpOneDimFloatArrayType(f(element))(size)(index)
 
     def zipWith(other: OneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
-        TmpOneDimFloatArrayType(f(element, other(Index.idx)))(size)
+        TmpOneDimFloatArrayType(f(element, other(Index.idx)))(size)(index)
     }
 
     def zipWith(other: TmpOneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
-        TmpOneDimFloatArrayType(f(element, other.element))(size)
+        TmpOneDimFloatArrayType(f(element, other.element))(size)(index)
     }
 
     def +(other: OneDimFloatArrayType) = zipWith(other)(_ + _)

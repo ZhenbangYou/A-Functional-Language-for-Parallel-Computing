@@ -250,8 +250,7 @@ case class TmpFloatArrayAccess(array: TmpOneDimFloatArrayType) extends PolyExpr[
 
     override def getResult: FloatType = result
 
-    // TODO
-    override val conditions: Set[BoolExpr] = Set()
+    override val conditions: Set[BoolExpr] = Set(array.index < array.size)
 }
 
 implicit def tmpArray(t: TmpOneDimFloatArrayType): TmpFloatArrayAccess = TmpFloatArrayAccess(t)
