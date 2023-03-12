@@ -27,7 +27,7 @@ object Index {
 
     private val IDX_NAME = "idx"
 
-    def defineIdx = s"int $IDX_NAME = ${idxExpr.codeGen};"
-
     val idx: IntType = IntType(IDX_NAME)
+
+    def defineIdx: InitializedDeclaration[IntType] = InitializedDeclaration(idx, idxExpr)
 }

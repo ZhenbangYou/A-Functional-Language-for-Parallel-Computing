@@ -13,7 +13,7 @@ case class GlobalFunc[T <: Type](name: String)(args: Type*)(body: PolyExpr[T]) e
         val sizeInArgs = args.filter(_.argsName.length == 2).map(_.argsName(1)).toSet.toList
         val argList = (namesInArgs ++ sizeInArgs :+ s"$resultRefType $resultArg").reduce((a, b) => s"$a, $b")
         s"""__global__ void $name($argList) {
-           |\t${Index.defineIdx}
+           |\t${Index.defineIdx.codeGen.stripTrailing}
            |${statements2String(body.genStatements, "\t").stripTrailing}
            |\t${resultAddress} = ${body.getResult.varName};
            |}""".stripMargin
@@ -27,7 +27,7 @@ case class DeviceFunc[T <: Type](name: String)(args: Type*)(body: PolyExpr[T]) e
         val sizeInArgs = args.filter(_.argsName.length == 2).map(_.argsName(1)).toSet.toList
         val argList = if ((namesInArgs ++ sizeInArgs).isEmpty) "" else (namesInArgs ++ sizeInArgs).reduce((a, b) => s"$a, $b")
         s"""__device__ $resultType $name($argList) {
-           |\t${Index.defineIdx}
+           |\t${Index.defineIdx.codeGen.stripTrailing}
            |${statements2String(body.genStatements, "\t").stripTrailing}
            |\treturn ${body.getResult.varName};
            |}""".stripMargin
