@@ -33,6 +33,10 @@ class FloatType(val varName: String) extends ScalarType with PolyExpr[FloatType]
     override def getResult: String = varName
 
     override def newInstance: FloatType = FloatType(TemporaryName())
+
+    override def genStmts: Vector[Statement] = Vector()
+
+    override def getRes: FloatType = this
 }
 
 implicit def floatConst(f: Float): FloatType = FloatType(f.toString)
@@ -53,6 +57,10 @@ class IntType(val varName: String) extends ScalarType with PolyExpr[IntType] {
     override def getResult: String = varName
 
     override def newInstance: IntType = IntType(TemporaryName())
+
+    override def genStmts: Vector[Statement] = Vector()
+
+    override def getRes: IntType = this
 }
 
 implicit def intConst(i: Int): IntType = IntType(i.toString)
@@ -63,6 +71,8 @@ trait ArrayType[T <: ScalarType with NewInstance[T]] extends Type {
     val baseTypeName: String
 
     def newBaseTypeInstance: T
+
+    def apply(index: PolyExpr[IntType]): PolyExpr[T]
 }
 
 class OneDimFloatArrayType(val varName: String)(val size: IntType) extends ArrayType[FloatType] {
@@ -129,6 +139,8 @@ class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntTyp
     def argsName: List[String] = List(s"float $varName[]", s"int ${size.varName}")
 
     def defName: String = ???
+
+    def apply(index: PolyExpr[IntType]): TmpFloatArrayAccess = TmpFloatArrayAccess(this)
 
     override def newBaseTypeInstance: FloatType = FloatType(TemporaryName())
 

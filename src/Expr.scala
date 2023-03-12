@@ -37,6 +37,10 @@ trait PolyExpr[T <: Type] extends Expr with NewInstance[T] {
     def >(other: PolyExpr[T]): GT[T] = GT(this, other)
 
     def >=(other: PolyExpr[T]): GE[T] = GE(this, other)
+
+    def genStmts: Vector[Statement]
+
+    def getRes: T
 }
 
 case class Add[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -58,6 +62,15 @@ case class Add[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
     override def getResult: String = resultName
 
     override def newInstance: T = srcA.newInstance
+
+    private val result = srcA.newInstance
+
+    override def genStmts: Vector[Statement] =
+        srcA.genStmts ++ srcB.genStmts ++ Vector(
+            InitializedDeclaration(result, Add(srcA.getRes.asInstanceOf[PolyExpr[T]], srcB.getRes.asInstanceOf[PolyExpr[T]]))
+        )
+
+    override def getRes: T = result
 }
 
 case class Sub[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -79,6 +92,15 @@ case class Sub[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
     override def getResult: String = resultName
 
     override def newInstance: T = srcA.newInstance
+
+    private val result = srcA.newInstance
+
+    override def genStmts: Vector[Statement] =
+        srcA.genStmts ++ srcB.genStmts ++ Vector(
+            InitializedDeclaration(result, Sub(srcA.getRes.asInstanceOf[PolyExpr[T]], srcB.getRes.asInstanceOf[PolyExpr[T]]))
+        )
+
+    override def getRes: T = result
 }
 
 case class Mul[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -100,6 +122,15 @@ case class Mul[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
     override def getResult: String = resultName
 
     override def newInstance: T = srcA.newInstance
+
+    private val result = srcA.newInstance
+
+    override def genStmts: Vector[Statement] =
+        srcA.genStmts ++ srcB.genStmts ++ Vector(
+            InitializedDeclaration(result, Mul(srcA.getRes.asInstanceOf[PolyExpr[T]], srcB.getRes.asInstanceOf[PolyExpr[T]]))
+        )
+
+    override def getRes: T = result
 }
 
 case class Div[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -121,6 +152,15 @@ case class Div[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
     override def getResult: String = resultName
 
     override def newInstance: T = srcA.newInstance
+
+    private val result = srcA.newInstance
+
+    override def genStmts: Vector[Statement] =
+        srcA.genStmts ++ srcB.genStmts ++ Vector(
+            InitializedDeclaration(result, Div(srcA.getRes.asInstanceOf[PolyExpr[T]], srcB.getRes.asInstanceOf[PolyExpr[T]]))
+        )
+
+    override def getRes: T = result
 }
 
 case class Neg[T <: Type](srcA: PolyExpr[T]) extends PolyExpr[T] {
@@ -141,6 +181,15 @@ case class Neg[T <: Type](srcA: PolyExpr[T]) extends PolyExpr[T] {
     override def getResult: String = resultName
 
     override def newInstance: T = srcA.newInstance
+
+    private val result = srcA.newInstance
+
+    override def genStmts: Vector[Statement] =
+        srcA.genStmts ++ Vector(
+            InitializedDeclaration(result, Neg(srcA.getRes.asInstanceOf[PolyExpr[T]]))
+        )
+
+    override def getRes: T = result
 }
 
 case class ArrayAccess[T <: ScalarType with NewInstance[T]](array: ArrayType[T], index: PolyExpr[IntType]) extends PolyExpr[T] {
@@ -161,6 +210,15 @@ case class ArrayAccess[T <: ScalarType with NewInstance[T]](array: ArrayType[T],
     override def getResult: String = resultName
 
     override def newInstance: T = array.newBaseTypeInstance
+
+    private val result = array.newBaseTypeInstance
+
+    override def genStmts: Vector[Statement] =
+        index.genStmts ++ Vector(
+            InitializedDeclaration(result, array(index.getRes))
+        )
+
+    override def getRes: T = result
 }
 
 trait BoolExpr extends Expr {
@@ -336,6 +394,13 @@ case class If[T <: Type](cond: BoolExpr)(thenBody: PolyExpr[T])(elseBody: PolyEx
     override def getResult: String = resultName
 
     override def newInstance: T = thenBody.newInstance
+
+    private val result = thenBody.newInstance
+
+    override def genStmts: Vector[Statement] =
+        Vector(IfStmt(cond)(thenBody.genStmts)(elseBody.genStmts))
+
+    override def getRes: T = result
 }
 
 case class TmpFloatArrayAccess(array: TmpOneDimFloatArrayType) extends PolyExpr[FloatType] {
@@ -351,6 +416,15 @@ case class TmpFloatArrayAccess(array: TmpOneDimFloatArrayType) extends PolyExpr[
     override def getResult: String = resultName
 
     override def newInstance: FloatType = array.newBaseTypeInstance
+
+    private val result = array.newBaseTypeInstance
+
+    override def genStmts: Vector[Statement] =
+        Vector(
+            InitializedDeclaration(result, array.element)
+        )
+
+    override def getRes: FloatType = result
 }
 
 implicit def tmpArray(t: TmpOneDimFloatArrayType): TmpFloatArrayAccess = TmpFloatArrayAccess(t)
