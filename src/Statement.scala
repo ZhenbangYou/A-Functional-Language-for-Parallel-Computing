@@ -4,8 +4,8 @@ sealed trait Statement {
     override def toString: String = codeGen
 }
 
-case class Assignment[T <: Expr](lhs: T, rhs: T) extends Statement {
-    def codeGen = s"${lhs.codeGen} = ${rhs.codeGen};\n"
+case class Assignment[T <: Type](lhs: T, rhs: PolyExpr[T]) extends Statement {
+    def codeGen = s"${lhs.varName} = ${rhs.codeGen};\n"
 }
 
 case class Declaration[T <: Type](variable: T) extends Statement {
