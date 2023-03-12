@@ -1,4 +1,4 @@
-@main def main() = {
+@main def main(): Unit = {
     val a = FloatType("a")
     val b = FloatType("b")
     val c = FloatType("c")

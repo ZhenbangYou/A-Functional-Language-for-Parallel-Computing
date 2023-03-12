@@ -97,33 +97,33 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
         TmpOneDimFloatArrayType(f(this (Index.idx), other.element))(size)(Index.idx)
     }
 
-    def +(other: OneDimFloatArrayType) = zipWith(other)(_ + _)
+    def +(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ + _)
 
-    def -(other: OneDimFloatArrayType) = zipWith(other)(_ - _)
+    def -(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ - _)
 
-    def *(other: OneDimFloatArrayType) = zipWith(other)(_ * _)
+    def *(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ * _)
 
-    def /(other: OneDimFloatArrayType) = zipWith(other)(_ / _)
+    def /(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ / _)
 
-    def +(other: TmpOneDimFloatArrayType) = zipWith(other)(_ + _)
+    def +(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ + _)
 
-    def -(other: TmpOneDimFloatArrayType) = zipWith(other)(_ - _)
+    def -(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ - _)
 
-    def *(other: TmpOneDimFloatArrayType) = zipWith(other)(_ * _)
+    def *(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ * _)
 
-    def /(other: TmpOneDimFloatArrayType) = zipWith(other)(_ / _)
+    def /(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ / _)
 
-    def unary_+ = this
+    def unary_+ : OneDimFloatArrayType = this
 
-    def unary_- = map(-_)
+    def unary_- : TmpOneDimFloatArrayType = map(-_)
 
-    def +(other: FloatType) = map(_ + other)
+    def +(other: FloatType): TmpOneDimFloatArrayType = map(_ + other)
 
-    def -(other: FloatType) = map(_ - other)
+    def -(other: FloatType): TmpOneDimFloatArrayType = map(_ - other)
 
-    def *(other: FloatType) = map(_ * other)
+    def *(other: FloatType): TmpOneDimFloatArrayType = map(_ * other)
 
-    def /(other: FloatType) = map(_ / other)
+    def /(other: FloatType): TmpOneDimFloatArrayType = map(_ / other)
 }
 
 class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntType)(val index: PolyExpr[IntType]) extends ArrayType[FloatType] {
@@ -150,42 +150,42 @@ class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntTyp
         TmpOneDimFloatArrayType(f(element, other.element))(size)(index)
     }
 
-    def +(other: OneDimFloatArrayType) = zipWith(other)(_ + _)
+    def +(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ + _)
 
-    def -(other: OneDimFloatArrayType) = zipWith(other)(_ - _)
+    def -(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ - _)
 
-    def *(other: OneDimFloatArrayType) = zipWith(other)(_ * _)
+    def *(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ * _)
 
-    def /(other: OneDimFloatArrayType) = zipWith(other)(_ / _)
+    def /(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ / _)
 
-    def +(other: TmpOneDimFloatArrayType) = zipWith(other)(_ + _)
+    def +(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ + _)
 
-    def -(other: TmpOneDimFloatArrayType) = zipWith(other)(_ - _)
+    def -(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ - _)
 
-    def *(other: TmpOneDimFloatArrayType) = zipWith(other)(_ * _)
+    def *(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ * _)
 
-    def /(other: TmpOneDimFloatArrayType) = zipWith(other)(_ / _)
+    def /(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ / _)
 
-    def unary_+ = this
+    def unary_+ : TmpOneDimFloatArrayType = this
 
-    def unary_- = map(-_)
+    def unary_- : TmpOneDimFloatArrayType = map(-_)
 
-    def +(other: FloatType) = map(_ + other)
+    def +(other: FloatType): TmpOneDimFloatArrayType = map(_ + other)
 
-    def -(other: FloatType) = map(_ - other)
+    def -(other: FloatType): TmpOneDimFloatArrayType = map(_ - other)
 
-    def *(other: FloatType) = map(_ * other)
+    def *(other: FloatType): TmpOneDimFloatArrayType = map(_ * other)
 
-    def /(other: FloatType) = map(_ / other)
+    def /(other: FloatType): TmpOneDimFloatArrayType = map(_ / other)
 }
 
 extension (f: FloatType) {
-    def +(other: OneDimFloatArrayType) = other.map(f + _)
-    def -(other: OneDimFloatArrayType) = other.map(f - _)
-    def *(other: OneDimFloatArrayType) = other.map(f * _)
-    def /(other: OneDimFloatArrayType) = other.map(f / _)
-    def +(other: TmpOneDimFloatArrayType) = other.map(f + _)
-    def -(other: TmpOneDimFloatArrayType) = other.map(f - _)
-    def *(other: TmpOneDimFloatArrayType) = other.map(f * _)
-    def /(other: TmpOneDimFloatArrayType) = other.map(f / _)
+    def +(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f + _)
+    def -(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f - _)
+    def *(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f * _)
+    def /(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f / _)
+    def +(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f + _)
+    def -(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f - _)
+    def *(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f * _)
+    def /(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f / _)
 }
