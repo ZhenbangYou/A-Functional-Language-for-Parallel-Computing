@@ -17,23 +17,27 @@ case class InitializedDeclaration[T <: Type](variable: T, initVal: PolyExpr[T]) 
 }
 
 case class IfStmt(cond: BoolExpr)(thenBody: Vector[Statement])(elseBody: Vector[Statement]) extends Statement {
-    def codeGen: String = s"if(${cond.codeGen}) {\n${
-        stmts2String(thenBody, "\t")
-    }} else {\n${stmts2String(thenBody, " \t")}}}\n"
+    def codeGen: String = s"if ${cond.codeGen} {\n${
+        statements2String(thenBody, "\t")
+    }} else {\n${statements2String(thenBody, " \t")}}\n"
 
 }
 
-case class WhileStmt(cond: BoolExpr)(body: Vector[Statement]) extends Statement {
-    def codeGen: String = s"while (${cond.codeGen}) {\n\t${
-        stmts2String(body, "\t")
+case class WhileLoop(cond: BoolExpr)(body: Vector[Statement]) extends Statement {
+    def codeGen: String = s"while ${cond.codeGen} {\n\t${
+        statements2String(body, "\t")
     }}\n"
 }
 
 case class For(init: Statement, cond: BoolExpr, post: Statement)(body: Vector[Statement]) extends Statement {
     override def codeGen: String = s"for (${init.codeGen}; ${cond.codeGen}; ${post.codeGen}) {\n\t${
-        stmts2String(body, "\t")
+        statements2String(body, "\t")
     }}\n"
 }
 
-def stmts2String(stmts: Vector[Statement], prepend: String): String =
-    stmts.map(x => s"$prepend${x.codeGen}\n").foldLeft("")(_ + _)
+def statements2String(statements: Vector[Statement], prepend: String): String =
+    statements.map(x => s"${
+        val xs = x.codeGen.split('\n')
+        val prepended = xs.map(prepend + _ + '\n')
+        prepended.foldLeft("")(_ + _)
+    }").foldLeft("")(_ + _)

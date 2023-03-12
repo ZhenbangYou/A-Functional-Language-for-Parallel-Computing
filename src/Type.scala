@@ -28,15 +28,11 @@ class FloatType(val varName: String) extends ScalarType with PolyExpr[FloatType]
 
     override def codeGen: String = varName
 
-    override def genStatements: Vector[String] = Vector()
-
-    override def getResult: String = varName
-
     override def newInstance: FloatType = FloatType(TemporaryName())
 
-    override def genStmts: Vector[Statement] = Vector()
+    override def genStatements: Vector[Statement] = Vector()
 
-    override def getRes: FloatType = this
+    override def getResult: FloatType = this
 }
 
 implicit def floatConst(f: Float): FloatType = FloatType(f.toString)
@@ -52,15 +48,11 @@ class IntType(val varName: String) extends ScalarType with PolyExpr[IntType] {
 
     override def codeGen: String = varName
 
-    override def genStatements: Vector[String] = Vector()
-
-    override def getResult: String = varName
-
     override def newInstance: IntType = IntType(TemporaryName())
 
-    override def genStmts: Vector[Statement] = Vector()
+    override def genStatements: Vector[Statement] = Vector()
 
-    override def getRes: IntType = this
+    override def getResult: IntType = this
 }
 
 implicit def intConst(i: Int): IntType = IntType(i.toString)
