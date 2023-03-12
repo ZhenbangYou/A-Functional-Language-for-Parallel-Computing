@@ -28,9 +28,11 @@ class FloatType(val varName: String) extends ScalarType with PolyExpr[FloatType]
 
     override def codeGen: String = varName
 
-    def genStatements: Vector[String] = Vector()
+    override def genStatements: Vector[String] = Vector()
 
-    def getResult: String = varName
+    override def getResult: String = varName
+
+    override def newInstance: FloatType = FloatType(TemporaryName())
 }
 
 implicit def floatConst(f: Float): FloatType = FloatType(f.toString)
@@ -46,17 +48,21 @@ class IntType(val varName: String) extends ScalarType with PolyExpr[IntType] {
 
     override def codeGen: String = varName
 
-    def genStatements: Vector[String] = Vector()
+    override def genStatements: Vector[String] = Vector()
 
-    def getResult: String = varName
+    override def getResult: String = varName
+
+    override def newInstance: IntType = IntType(TemporaryName())
 }
 
 implicit def intConst(i: Int): IntType = IntType(i.toString)
 
-trait ArrayType[T <: ScalarType] extends Type {
+trait ArrayType[T <: ScalarType with NewInstance[T]] extends Type {
     val varName: String
     val size: IntType
     val baseTypeName: String
+
+    def newBaseTypeInstance: T
 }
 
 class OneDimFloatArrayType(val varName: String)(val size: IntType) extends ArrayType[FloatType] {
@@ -67,6 +73,8 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
     def argsName: List[String] = List(s"float $varName[]", s"int ${size.varName}")
 
     def defName: String = ???
+
+    override def newBaseTypeInstance: FloatType = FloatType(TemporaryName())
 
     def apply(index: PolyExpr[IntType]): ArrayAccess[FloatType] = ArrayAccess(this, index)
 
@@ -121,6 +129,8 @@ class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntTyp
     def argsName: List[String] = List(s"float $varName[]", s"int ${size.varName}")
 
     def defName: String = ???
+
+    override def newBaseTypeInstance: FloatType = FloatType(TemporaryName())
 
     def map(f: PolyExpr[FloatType] => PolyExpr[FloatType]): TmpOneDimFloatArrayType = TmpOneDimFloatArrayType(f(element))(size)
 
