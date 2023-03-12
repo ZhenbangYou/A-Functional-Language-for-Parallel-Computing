@@ -4,7 +4,7 @@ sealed trait Func {
     override def toString: String = codeGen
 }
 
-case class GlobalFunc[T <: Expr](name: String)(args: Type*)(body: T) extends Func {
+case class GlobalFunc[T <: Type](name: String)(args: Type*)(body: PolyExpr[T]) extends Func {
     def codeGen: String = {
         val resultRefType = body.refTypeName // return type of the function, in reference type
         val RESULT_ARG = "result"
@@ -20,7 +20,7 @@ case class GlobalFunc[T <: Expr](name: String)(args: Type*)(body: T) extends Fun
     }
 }
 
-case class DeviceFunc[T <: Expr](name: String)(args: Type*)(body: T) extends Func {
+case class DeviceFunc[T <: Type](name: String)(args: Type*)(body: PolyExpr[T]) extends Func {
     def codeGen: String = {
         val resultType = body.typeName // return type of the function, in reference type
         val namesInArgs = args.map(_.argsName.head)
