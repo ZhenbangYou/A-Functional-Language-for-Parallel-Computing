@@ -89,7 +89,7 @@
     }
     println(
         GlobalFunc("call")(x) {
-            x.map(y => fn(y))
+            x.map(y => fn(x2, x2))
         }
     )
 }

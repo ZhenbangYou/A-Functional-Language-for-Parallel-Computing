@@ -37,7 +37,7 @@ class FloatType(val varName: String) extends ScalarType with PolyExpr[FloatType]
 
     override val conditions: Set[BoolExpr] = Set()
 
-    override val statementsAtFuncBegin: Set[Vector[Statement]] = Set()
+    override def statementsAtFuncBegin: Set[Vector[Statement]] = Set()
 }
 
 implicit def floatConst(f: Float): FloatType = FloatType(f.toString)
@@ -61,12 +61,12 @@ class IntType(val varName: String) extends ScalarType with PolyExpr[IntType] {
 
     override val conditions: Set[BoolExpr] = Set()
 
-    override val statementsAtFuncBegin: Set[Vector[Statement]] = Set()
+    override def statementsAtFuncBegin: Set[Vector[Statement]] = Set()
 }
 
 implicit def intConst(i: Int): IntType = IntType(i.toString)
 
-trait ArrayType[T <: ScalarType with NewInstance[T]] extends Type {
+trait ArrayType[T <: ScalarType with NewInstance[T]] extends Type with Expr {
     val varName: String
     val size: IntType
     val baseTypeName: String
@@ -74,6 +74,13 @@ trait ArrayType[T <: ScalarType with NewInstance[T]] extends Type {
     def newBaseTypeInstance: T
 
     def apply(index: PolyExpr[IntType]): PolyExpr[T]
+
+    def codeGen: String = varName
+
+    val typeName: String
+    val refTypeName: String
+
+    val conditions: Set[BoolExpr] = Set()
 
     def statementsAtFuncBegin: Set[Vector[Statement]]
 }
@@ -172,14 +179,14 @@ class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntTyp
     def argsName: List[String] = List(s"float $varName[]", s"int ${size.varName}")
 
     def defName: String = ???
-    
+
     def statementsAtFuncBegin: Set[Vector[Statement]] = _statementsAtFuncBegin
 
     def apply(index: PolyExpr[IntType]): TmpFloatArrayAccess = TmpFloatArrayAccess(this)
 
     override def newBaseTypeInstance: FloatType = FloatType(TemporaryName())
 
-    def map(f: PolyExpr[FloatType] => PolyExpr[FloatType]): TmpOneDimFloatArrayType = 
+    def map(f: PolyExpr[FloatType] => PolyExpr[FloatType]): TmpOneDimFloatArrayType =
         TmpOneDimFloatArrayType(f(element))(size)(index)(statementsAtFuncBegin)
 
     def zipWith(other: OneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {

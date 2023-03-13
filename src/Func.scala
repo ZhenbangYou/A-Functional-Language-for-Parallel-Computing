@@ -49,5 +49,8 @@ case class DeviceFunc[T <: Type](name: String)(val args: Type*)(val body: PolyEx
            |}""".stripMargin
     }
 
-    def apply(params: Expr*): FunctionApplication[T] = FunctionApplication(this, params: _*)
+    def apply(params: Expr*): FunctionApplication[T] = {
+        assert(params.length == args.length)
+        FunctionApplication(this, params: _*)
+    }
 }

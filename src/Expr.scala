@@ -1,6 +1,6 @@
 import scala.language.implicitConversions
 
-sealed trait Expr extends Typable {
+trait Expr extends Typable {
     def codeGen: String
 
     val typeName: String
@@ -10,7 +10,7 @@ sealed trait Expr extends Typable {
 
     val conditions: Set[BoolExpr]
 
-    val statementsAtFuncBegin: Set[Vector[Statement]]
+    def statementsAtFuncBegin: Set[Vector[Statement]]
 }
 
 trait PolyExpr[T <: Type] extends Expr with NewInstance[T] {
