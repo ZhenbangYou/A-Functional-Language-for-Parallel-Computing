@@ -39,6 +39,8 @@ trait PolyExpr[T <: Type] extends Expr with NewInstance[T] {
     def getResult: T
 
     val conditions: Set[BoolExpr]
+
+    val statementsAtFuncBegin: Set[Vector[Statement]]
 }
 
 case class Add[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -59,6 +61,9 @@ case class Add[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
     override def getResult: T = result
 
     override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
 }
 
 case class Sub[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -79,6 +84,9 @@ case class Sub[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
     override def getResult: T = result
 
     override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
 }
 
 case class Mul[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -99,6 +107,9 @@ case class Mul[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
     override def getResult: T = result
 
     override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
 }
 
 case class Div[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -119,6 +130,9 @@ case class Div[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
     override def getResult: T = result
 
     override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
 }
 
 case class Neg[T <: Type](srcA: PolyExpr[T]) extends PolyExpr[T] {
@@ -139,6 +153,9 @@ case class Neg[T <: Type](srcA: PolyExpr[T]) extends PolyExpr[T] {
     override def getResult: T = result
 
     override val conditions: Set[BoolExpr] = srcA.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        srcA.statementsAtFuncBegin
 }
 
 case class ArrayAccess[T <: ScalarType with NewInstance[T]](array: ArrayType[T], index: PolyExpr[IntType]) extends PolyExpr[T] {
@@ -154,7 +171,7 @@ case class ArrayAccess[T <: ScalarType with NewInstance[T]](array: ArrayType[T],
     override def genStatements: Vector[Statement] =
         index.genStatements ++ Vector(
             Declaration(result),
-            IfThen(index < array.size) {
+            IfThen(index.getResult < array.size) {
                 Assignment(result, array(index.getResult))
             }
         )
@@ -162,6 +179,9 @@ case class ArrayAccess[T <: ScalarType with NewInstance[T]](array: ArrayType[T],
     override def getResult: T = result
 
     override val conditions: Set[BoolExpr] = index.conditions + (index < array.size)
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        array.statementsAtFuncBegin | index.statementsAtFuncBegin
 }
 
 trait BoolExpr extends Expr {
@@ -234,6 +254,9 @@ case class If[T <: Type](cond: BoolExpr)(thenBody: PolyExpr[T])(elseBody: PolyEx
     override def getResult: T = result
 
     override val conditions: Set[BoolExpr] = thenBody.conditions | elseBody.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        thenBody.statementsAtFuncBegin | elseBody.statementsAtFuncBegin
 }
 
 case class TmpFloatArrayAccess(array: TmpOneDimFloatArrayType) extends PolyExpr[FloatType] {
@@ -257,6 +280,9 @@ case class TmpFloatArrayAccess(array: TmpOneDimFloatArrayType) extends PolyExpr[
     override def getResult: FloatType = result
 
     override val conditions: Set[BoolExpr] = Set(array.index < array.size)
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        array.statementsAtFuncBegin | array.index.statementsAtFuncBegin
 }
 
 implicit def tmpArray(t: TmpOneDimFloatArrayType): TmpFloatArrayAccess = TmpFloatArrayAccess(t)

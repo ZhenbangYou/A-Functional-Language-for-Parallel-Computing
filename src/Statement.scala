@@ -5,23 +5,33 @@ trait Statement {
 }
 
 case class Assignment[T <: Type](lhs: T, rhs: PolyExpr[T]) extends Statement {
-    def codeGen: String = s"${lhs.varName} = ${rhs.codeGen};\n"
+    override def codeGen: String = s"${lhs.varName} = ${rhs.codeGen};\n"
+}
+
+case class ArrayStoreWithoutBoundCheck[T <: ScalarType with NewInstance[T]](array: ArrayType[T], index: IntType, value: T) extends Statement {
+    override def codeGen: String =
+        s"${array.varName}[${index.getResult}] = ${value.varName};"
 }
 
 case class Declaration[T <: Type](variable: T) extends Statement {
-    def codeGen: String = variable.defName
+    override def codeGen: String = variable.defName
+}
+
+case class DeclareStaticArray[T <: ScalarType with NewInstance[T]](array: ArrayType[T], low: Int, high: Int) extends Statement {
+    override def codeGen: String =
+        s"__static__ ${array.varName}[${Constants.WARP_SIZE + high - low}];\n"
 }
 
 case class InitializedDeclaration[T <: Type](variable: T, initVal: PolyExpr[T]) extends Statement {
-    def codeGen: String = s"${variable.defName.split('=').head} = ${initVal.codeGen};\n"
+    override def codeGen: String = s"${variable.defName.split('=').head} = ${initVal.codeGen};\n"
 }
 
 case class Ternary[T <: Type](dst: PolyExpr[T])(cond: BoolExpr)(trueBranch: PolyExpr[T])(falseBranch: PolyExpr[T]) extends Statement {
-    def codeGen: String = s"${dst.codeGen} = ${cond.codeGen} ? ${trueBranch.codeGen} : ${falseBranch.codeGen};\n"
+    override def codeGen: String = s"${dst.codeGen} = ${cond.codeGen} ? ${trueBranch.codeGen} : ${falseBranch.codeGen};\n"
 }
 
 case class IfThen(cond: BoolExpr)(thenBody: Statement*) extends Statement {
-    def codeGen: String =
+    override def codeGen: String =
         s"""if ${cond.codeGen} {
            |${statements2String(thenBody.toVector, "\t").stripTrailing}
            |}""".stripMargin
@@ -29,7 +39,7 @@ case class IfThen(cond: BoolExpr)(thenBody: Statement*) extends Statement {
 }
 
 case class IfThenElse(cond: BoolExpr)(thenBody: Statement*)(elseBody: Statement*) extends Statement {
-    def codeGen: String =
+    override def codeGen: String =
         s"""if ${cond.codeGen} {
            |${statements2String(thenBody.toVector, "\t").stripTrailing}
            |} else {
@@ -39,17 +49,21 @@ case class IfThenElse(cond: BoolExpr)(thenBody: Statement*)(elseBody: Statement*
 }
 
 case class WhileLoop(cond: BoolExpr)(body: Statement*) extends Statement {
-    def codeGen: String =
+    override def codeGen: String =
         s"""while ${cond.codeGen} {
            |${statements2String(body.toVector, "\t").stripTrailing}
            |}""".stripMargin
 }
 
-case class For(init: Statement, cond: BoolExpr, post: Statement)(body: Statement*) extends Statement {
-    override def codeGen: String =
-        s"""for (${init.codeGen}; ${cond.codeGen}; ${post.codeGen}) {
-           |${statements2String(body.toVector, "\t")}
+case class ForLoop(init: Statement, cond: BoolExpr, post: Statement)(body: Statement*) extends Statement {
+    override def codeGen: String = {
+        val initCode = init.codeGen.substring(0, init.codeGen.length - 2)
+        val condCode = cond.codeGen
+        val postCode = post.codeGen.substring(0, post.codeGen.length - 2)
+        s"""for ($initCode; $condCode; $postCode) {
+           |${statements2String(body.toVector, "\t").stripTrailing}
            |}""".stripMargin
+    }
 }
 
 def statements2String(statements: Vector[Statement], prepend: String = ""): String =
