@@ -84,5 +84,13 @@
             x2.map(y => (x2(Index.idx - 1) + x2(Index.idx) + x2(Index.idx + 1)) / 3)
         }
     )
+    val fn = DeviceFunc("plus")(a, b) {
+        a + b
+    }
+    println(
+        GlobalFunc("call")(x) {
+            x.map(y => fn(y))
+        }
+    )
 }
 

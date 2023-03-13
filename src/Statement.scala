@@ -26,6 +26,14 @@ case class InitializedDeclaration[T <: Type](variable: T, initVal: PolyExpr[T]) 
     override def codeGen: String = s"${variable.defName.split('=').head} = ${initVal.codeGen};\n"
 }
 
+/*case class Call[T <: Type](fn: DeviceFunc[T], args: Expr*) extends Statement {
+    override def codeGen: String = {
+        val argList = args.map(_.codeGen + ", ").foldLeft("")(_ + _)
+        val argListStripped = if (argList.isEmpty) " " else argList.substring(0, argList.length - 2)
+        s"${fn.name}($argListStripped)"
+    }
+}*/
+
 case class Ternary[T <: Type](dst: PolyExpr[T])(cond: BoolExpr)(trueBranch: PolyExpr[T])(falseBranch: PolyExpr[T]) extends Statement {
     override def codeGen: String = s"${dst.codeGen} = ${cond.codeGen} ? ${trueBranch.codeGen} : ${falseBranch.codeGen};\n"
 }

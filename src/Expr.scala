@@ -184,6 +184,34 @@ case class ArrayAccess[T <: ScalarType with NewInstance[T]](array: ArrayType[T],
         array.statementsAtFuncBegin | index.statementsAtFuncBegin
 }
 
+case class FunctionApplication[T <: Type](fn: DeviceFunc[T], args: Expr*) extends PolyExpr[T] {
+    override def codeGen: String = {
+        val argList = args.map(_.codeGen + ", ").foldLeft("")(_ + _)
+        val argListStripped = if (argList.isEmpty) " " else argList.substring(0, argList.length - 2)
+        s"${fn.name}($argListStripped)"
+    }
+
+    override val typeName: String = fn.body.typeName
+    override val refTypeName: String = fn.body.refTypeName
+
+    override def newInstance: T = fn.body.newInstance
+
+    private val result = fn.body.newInstance
+
+    override def genStatements: Vector[Statement] =
+        Vector(
+            Declaration(result),
+            Assignment(result, FunctionApplication(fn, args: _*))
+        )
+
+    override def getResult: T = result
+
+    override val conditions: Set[BoolExpr] = args.map(_.conditions).fold(Set())(_ ++ _)
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        args.map(_.statementsAtFuncBegin).fold(Set())(_ ++ _)
+}
+
 trait BoolExpr extends Expr {
     def &&(other: BoolExpr): And = And(this, other)
 

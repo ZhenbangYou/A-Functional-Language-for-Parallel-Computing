@@ -48,4 +48,6 @@ case class DeviceFunc[T <: Type](name: String)(val args: Type*)(val body: PolyEx
            |\treturn ${body.getResult.varName};
            |}""".stripMargin
     }
+
+    def apply(params: Expr*): FunctionApplication[T] = FunctionApplication(this, params: _*)
 }
