@@ -34,6 +34,9 @@ I will keep updating this project even after the winter quarter of 2023.
 2. OpenAI Triton (https://openai.com/research/triton): not functional enough, still too imperative
 3. Scala Parallel Collections (https://docs.scala-lang.org/overviews/parallel-collections/overview.html): easy to use, only supporting CPU multithreading
 ### Academic Work (Still Incomplete)
+1. LIFT (https://michel.steuwer.info/files/publications/2017/CGO-2017.pdf, https://michel.steuwer.info/files/publications/2019/FHPNC-1-2019.pdf)
+2. Kokkos (https://kokkos.github.io/kokkos-core-wiki/)
+3. Sequoia (http://graphics.stanford.edu/papers/sequoia/sequoia_sc06.pdf)
 
 ## Tough Things
 1. Low-level IR close to CUDA
