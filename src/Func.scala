@@ -1,4 +1,4 @@
-sealed trait Func {
+sealed trait Func extends Statement {
     def codeGen: String
 
     override def toString: String = codeGen

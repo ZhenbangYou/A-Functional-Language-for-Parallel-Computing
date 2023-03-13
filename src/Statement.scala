@@ -1,4 +1,4 @@
-sealed trait Statement {
+trait Statement {
     def codeGen: String // must include \n
 
     override def toString: String = codeGen
