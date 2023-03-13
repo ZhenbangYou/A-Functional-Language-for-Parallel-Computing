@@ -7,6 +7,10 @@ sealed trait Expr extends Typable {
     val refTypeName: String
 
     override def toString: String = codeGen
+
+    val conditions: Set[BoolExpr]
+
+    val statementsAtFuncBegin: Set[Vector[Statement]]
 }
 
 trait PolyExpr[T <: Type] extends Expr with NewInstance[T] {
@@ -37,10 +41,6 @@ trait PolyExpr[T <: Type] extends Expr with NewInstance[T] {
     def genStatements: Vector[Statement]
 
     def getResult: T
-
-    val conditions: Set[BoolExpr]
-
-    val statementsAtFuncBegin: Set[Vector[Statement]]
 }
 
 case class Add[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -197,38 +197,83 @@ trait BoolExpr extends Expr {
 
 case class EQ[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} == ${srcB.codeGen})"
+
+    override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
 }
 
 case class NE[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} != ${srcB.codeGen})"
+
+    override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
 }
 
 case class LT[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} < ${srcB.codeGen})"
+
+    override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
 }
 
 case class LE[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} <= ${srcB.codeGen})"
+
+    override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
 }
 
 case class GT[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} > ${srcB.codeGen})"
+
+    override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
 }
 
 case class GE[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} >= ${srcB.codeGen})"
+
+    override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
 }
 
 case class And(srcA: BoolExpr, srcB: BoolExpr) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} && ${srcB.codeGen})"
+
+    override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
 }
 
 case class Or(srcA: BoolExpr, srcB: BoolExpr) extends BoolExpr {
     override def codeGen: String = s"(${srcA.codeGen} || ${srcB.codeGen})"
+
+    override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
 }
 
 case class Not(srcA: BoolExpr) extends BoolExpr {
     override def codeGen: String = s"(!${srcA.codeGen})"
+
+    override val conditions: Set[BoolExpr] = srcA.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        srcA.statementsAtFuncBegin
 }
 
 case class If[T <: Type](cond: BoolExpr)(thenBody: PolyExpr[T])(elseBody: PolyExpr[T]) extends PolyExpr[T] {
