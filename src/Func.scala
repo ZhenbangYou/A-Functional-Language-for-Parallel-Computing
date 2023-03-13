@@ -34,7 +34,7 @@ case class GlobalFunc[T <: Type](name: String)(args: Type*)(body: PolyExpr[T]) e
     }
 }
 
-case class DeviceFunc[T <: Type](name: String)(args: Type*)(body: PolyExpr[T]) extends Func {
+case class DeviceFunc[T <: Type](name: String)(val args: Type*)(val body: PolyExpr[T]) extends Func {
     override def codeGen: String = {
         val resultType = body.typeName // return type of the function, in reference type
         val namesInArgs = args.map(_.argsName.head)
