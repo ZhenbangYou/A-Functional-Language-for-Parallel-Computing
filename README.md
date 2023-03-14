@@ -24,7 +24,7 @@ This DSL involves three things I am the most fascinated about:
  
 I have fallen in love with computer systems for years, but have little experience in the research of this field.
 This is the first time I have ever involved in a project whose feasibility is so uncertain.
-If I do not do well, this will still be a *glorious failure" (quoted from the preface of Hennessy and Patterson) for me.
+If I do not do well, this will still be a *glorious failure* (quoted from the preface of Hennessy and Patterson) for me.
 
 I will keep updating this project even after the winter quarter of 2023.
 
