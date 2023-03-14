@@ -329,7 +329,7 @@ case class Not(srcA: BoolExpr) extends BoolExpr {
         srcA.statementsAtFuncBegin
 }
 
-case class If[T <: Type](cond: BoolExpr)(thenBody: PolyExpr[T])(elseBody: PolyExpr[T]) extends PolyExpr[T] {
+case class If[T <: Type](cond: BoolExpr)(val thenBody: PolyExpr[T])(val elseBody: PolyExpr[T]) extends PolyExpr[T] {
     override val typeName: String = thenBody.typeName
     override val refTypeName: String = thenBody.refTypeName
 

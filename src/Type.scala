@@ -18,7 +18,7 @@ sealed trait Type extends Typable {
 
 trait ScalarType extends Type
 
-class FloatType(val varName: String) extends ScalarType with PolyExpr[FloatType] {
+case class FloatType(val varName: String) extends ScalarType with PolyExpr[FloatType] {
     override val typeName: String = "float"
 
     override val refTypeName: String = s"$typeName*"
@@ -42,7 +42,7 @@ class FloatType(val varName: String) extends ScalarType with PolyExpr[FloatType]
 
 implicit def floatConst(f: Float): FloatType = FloatType(s"(${f.toString})")
 
-class IntType(val varName: String) extends ScalarType with PolyExpr[IntType] {
+case class IntType(val varName: String) extends ScalarType with PolyExpr[IntType] {
     override val typeName: String = "int"
 
     override val refTypeName: String = s"$typeName*"
@@ -129,23 +129,27 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
 
     override def newBaseTypeInstance: FloatType = FloatType(TemporaryName())
 
-    def apply(index: PolyExpr[IntType]): ArrayAccess[FloatType] = ArrayAccess(this, index % Index.blockDim.x - lowOffset)
+    def apply(index: PolyExpr[IntType]): ArrayAccess[FloatType] = ArrayAccess(this, {
+        if (!isStatic) index else {
+            ModIndex(replace(index, Index.idx, Index.threadIdx.x), Index.blockDim.x) - lowOffset
+        }
+    })
 
     def map(f: PolyExpr[FloatType] => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
-        val idx = if (isStatic) Index.threadIdx.x - lowOffset else Index.idx
+        val idx = Index.idx
         val element = this (idx)
         TmpOneDimFloatArrayType(f(element))(size)(Index.idx)(statementsAtFuncBegin)
     }
 
     def zipWith(other: OneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
-        val idx = if (isStatic) Index.threadIdx.x - lowOffset else Index.idx
-        val otherIdx = if (other.isStatic) Index.threadIdx.x - other.lowOffset else Index.idx
+        val idx = Index.idx
+        val otherIdx = Index.idx
         TmpOneDimFloatArrayType(f(this (idx), other(otherIdx)))(size)(Index.idx)(
             statementsAtFuncBegin)
     }
 
     def zipWith(other: TmpOneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
-        val idx = if (isStatic) Index.threadIdx.x - lowOffset else Index.idx
+        val idx = Index.idx
         TmpOneDimFloatArrayType(f(this (idx), other.element))(size)(Index.idx)(
             statementsAtFuncBegin)
     }
@@ -205,7 +209,7 @@ class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntTyp
         TmpOneDimFloatArrayType(f(element))(size)(index)(statementsAtFuncBegin)
 
     def zipWith(other: OneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
-        val idx = if (other.isStatic) Index.threadIdx.x - other.lowOffset else Index.idx
+        val idx = Index.idx
         TmpOneDimFloatArrayType(f(element, other(idx)))(size)(index)(statementsAtFuncBegin)
     }
 
@@ -260,3 +264,29 @@ extension (f: FloatType) {
     def /(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f / _)
     def %(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f % _)
 }
+
+def replace[T <: Type](expr: PolyExpr[T], src: PolyExpr[T], dst: PolyExpr[T]): PolyExpr[T] = if (expr == src) dst else
+    expr match
+        case Add(srcA, srcB) => Add(replace(srcA, src, dst), replace(srcB, src, dst))
+        case Sub(srcA, srcB) => Sub(replace(srcA, src, dst), replace(srcB, src, dst))
+        case Mul(srcA, srcB) => Mul(replace(srcA, src, dst), replace(srcB, src, dst))
+        case Div(srcA, srcB) => Div(replace(srcA, src, dst), replace(srcB, src, dst))
+        case Mod(srcA, srcB) => Sub(replace(srcA, src, dst), replace(srcB, src, dst))
+        case If(cond) => If(cond)(replace(expr.asInstanceOf[If[T]].thenBody, src, dst))(
+            replace(expr.asInstanceOf[If[T]].elseBody, src, dst)
+        )
+        case Neg(srcA) => Neg(replace(srcA, src, dst))
+        case _ => expr
+
+def ModIndex[T <: Type](expr: PolyExpr[T], mod: PolyExpr[T]): PolyExpr[T] =
+    expr match
+        case Add(srcA, srcB) => expr
+        case Sub(srcA, srcB) => expr
+        case Mul(srcA, srcB) => expr
+        case Div(srcA, srcB) => expr
+        case Mod(srcA, srcB) => expr
+        case If(cond) => expr
+        case Neg(srcA) => expr
+        case FloatType(_) => expr
+        case IntType(_) => expr
+        case _ => expr % mod
