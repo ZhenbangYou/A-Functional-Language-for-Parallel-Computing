@@ -26,10 +26,6 @@ case class InitializedDeclaration[T <: Type](variable: T, initVal: PolyExpr[T]) 
     override def codeGen: String = s"${variable.defName.split('=').head} = ${initVal.codeGen};\n"
 }
 
-case class Ternary[T <: Type](dst: PolyExpr[T])(cond: BoolExpr)(trueBranch: PolyExpr[T])(falseBranch: PolyExpr[T]) extends Statement {
-    override def codeGen: String = s"${dst.codeGen} = ${cond.codeGen} ? ${trueBranch.codeGen} : ${falseBranch.codeGen};\n"
-}
-
 case class IfThen(cond: BoolExpr)(thenBody: Statement*) extends Statement {
     override def codeGen: String =
         s"""if ${cond.codeGen} {
