@@ -62,6 +62,10 @@ case class ForLoop(init: Statement, cond: BoolExpr, post: Statement)(body: State
     }
 }
 
+class SyncThreads extends Statement {
+    override def codeGen: String = "__syncthreads();\n"
+}
+
 def statements2String(statements: Vector[Statement], prepend: String = ""): String =
     statements.map(x => s"${
         val xs = x.codeGen.split('\n')
