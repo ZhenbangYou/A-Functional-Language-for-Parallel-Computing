@@ -45,7 +45,10 @@ I will keep updating this project even after the winter quarter of 2023.
       - low-level, close to CUDA, statement-oriented.
 2. Expression-oriented style in FP to statement-oriented style in CUDA.
 3. Achieving high performance while maintaining functional and easy-to-use APIs (previous work sacrifice the latter for the former, but I will try the other way -- always keeping the APIs functional and easy-to-use, and making attempts to improve its performance).
-4. In CUDA, synchronization can only occur within the same block.
+4. In CUDA, synchronization can only occur within the same block, which implies:
+   - Narrow dependencies are still easy to cope with, since previous results can be kept in registers.
+   - Wide intra-block dependencies are not hard, since previous results can be kept in shared memory. In this case, although `__syncthreads()` is required, we can still put all the code within the same function.
+   - Wide inter-block dependencies are truly hard to manage automatically. To wait for all blocks to finish a stage of computation, a function call is required because there is no primitive to synchronize all blocks. Newly allocated memory is also required to hold intermediate result. At the moment, I understand why *Triton* asks the user to manually manage inter-block dependencies.
 5. Some CUDA threads should do nothing because they are out of bound, e.g., an array has only 31 elements but 32 (equal to warp size) CUDA threads are used.
 
 ## Requirements
