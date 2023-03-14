@@ -81,7 +81,7 @@
     val x2 = x.createStaticArray(-1, 1)
     println(
         GlobalFunc("blur")(x) {
-            x2.map(y => (x2(Index.idx - 1) + x2(Index.idx) + x2(Index.idx + 1)) / 3)
+            x2.map(y => (x2(x2.getIndex - 1) + x2(x2.getIndex) + x2(x2.getIndex + 1)) / 3)
         }
     )
     val fn = DeviceFunc("plus")(a, b) {
