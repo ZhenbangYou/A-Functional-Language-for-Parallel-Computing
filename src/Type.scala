@@ -86,13 +86,13 @@ trait ArrayType[T <: ScalarType with NewInstance[T]] extends Type with Expr {
 }
 
 class OneDimFloatArrayType(val varName: String)(val size: IntType) extends ArrayType[FloatType] {
-    val typeName: String = "float*"
-    val refTypeName: String = typeName
+    override val typeName: String = "float*"
+    override val refTypeName: String = typeName
     override val baseTypeName: String = "float"
 
-    def argsName: List[String] = List(s"float $varName[]", s"int ${size.varName}")
+    override def argsName: List[String] = List(s"float $varName[]", s"int ${size.varName}")
 
-    def defName: String = ???
+    override def defName: String = throw Exception("Array should not be defined!")
 
     private var _lowOffset = 0
 
@@ -183,19 +183,25 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
     def %(other: FloatType): TmpOneDimFloatArrayType = map(_ % other)
 }
 
-class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntType)(val index: PolyExpr[IntType])(_statementsAtFuncBegin: Set[Vector[Statement]]) extends ArrayType[FloatType] {
-    val typeName: String = "float*"
-    val refTypeName: String = typeName
+trait TmpArrayType[T <: ScalarType with NewInstance[T]] extends ArrayType[T] {
+    def element: PolyExpr[T]
+
+    def index: PolyExpr[IntType]
+}
+
+class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntType)(val index: PolyExpr[IntType])(_statementsAtFuncBegin: Set[Vector[Statement]]) extends TmpArrayType[FloatType] {
+    override val typeName: String = "float*"
+    override val refTypeName: String = typeName
     override val baseTypeName: String = "float"
     override val varName: String = element.codeGen
 
-    def argsName: List[String] = List(s"float $varName[]", s"int ${size.varName}")
+    override def argsName: List[String] = List(s"float $varName[]", s"int ${size.varName}")
 
-    def defName: String = ???
+    override def defName: String = throw Exception("Array should not be defined!")
 
     def statementsAtFuncBegin: Set[Vector[Statement]] = _statementsAtFuncBegin
 
-    def apply(index: PolyExpr[IntType]): TmpFloatArrayAccess = TmpFloatArrayAccess(this)
+    def apply(index: PolyExpr[IntType]): TmpArrayAccess[FloatType] = TmpArrayAccess(this)
 
     override def newBaseTypeInstance: FloatType = FloatType(TemporaryName())
 

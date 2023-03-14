@@ -8,7 +8,7 @@ case class GlobalFunc[T <: Type](name: String)(args: Type*)(body: PolyExpr[T]) e
     override def codeGen: String = {
         val resultRefType = body.refTypeName // return type of the function, in reference type
         val resultArg = "result"
-        val resultAddress = if (!body.isInstanceOf[TmpFloatArrayAccess]) "*result" else "result[idx]"
+        val resultAddress = if (!body.isInstanceOf[TmpArrayAccess[_]]) "*result" else "result[idx]"
         val namesInArgs = args.map(_.argsName.head)
         val sizeInArgs = args.filter(_.argsName.length == 2).map(_.argsName(1)).toSet.toList
         val argList = (namesInArgs ++ sizeInArgs :+ s"$resultRefType $resultArg").reduce((a, b) => s"$a, $b")

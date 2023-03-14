@@ -357,25 +357,25 @@ case class If[T <: Type](cond: BoolExpr)(val thenBody: PolyExpr[T])(val elseBody
         thenBody.statementsAtFuncBegin | elseBody.statementsAtFuncBegin
 }
 
-case class TmpFloatArrayAccess(array: TmpOneDimFloatArrayType) extends PolyExpr[FloatType] {
-    def codeGen: String = array.element.codeGen
+case class TmpArrayAccess[T <: ScalarType with NewInstance[T]](array: TmpArrayType[T]) extends PolyExpr[T] {
+    override def codeGen: String = array.element.codeGen
 
     override val typeName: String = array.baseTypeName
     override val refTypeName: String = s"$typeName*"
 
-    override def newInstance: FloatType = array.newBaseTypeInstance
+    override def newInstance: T = array.newBaseTypeInstance
 
     private val result = array.newBaseTypeInstance
 
     override def genStatements: Vector[Statement] = {
-        val stmts = array.element.genStatements :+ Assignment(result, array.element.getResult)
+        val stmts = array.element.genStatements :+ Assignment(result, array.element.getResult.asInstanceOf[PolyExpr[T]])
         Vector(
             Declaration(result),
             IfThen(array.index < array.size)(stmts: _*)
         )
     }
 
-    override def getResult: FloatType = result
+    override def getResult: T = result
 
     override val conditions: Set[BoolExpr] = Set(array.index < array.size)
 
@@ -383,4 +383,4 @@ case class TmpFloatArrayAccess(array: TmpOneDimFloatArrayType) extends PolyExpr[
         array.statementsAtFuncBegin | array.index.statementsAtFuncBegin
 }
 
-implicit def tmpArray(t: TmpOneDimFloatArrayType): TmpFloatArrayAccess = TmpFloatArrayAccess(t)
+implicit def tmpArray(t: TmpOneDimFloatArrayType): TmpArrayAccess[FloatType] = TmpArrayAccess(t)
