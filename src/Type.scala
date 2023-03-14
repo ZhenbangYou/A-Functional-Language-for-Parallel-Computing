@@ -40,7 +40,7 @@ class FloatType(val varName: String) extends ScalarType with PolyExpr[FloatType]
     override def statementsAtFuncBegin: Set[Vector[Statement]] = Set()
 }
 
-implicit def floatConst(f: Float): FloatType = FloatType(f.toString)
+implicit def floatConst(f: Float): FloatType = FloatType(s"(${f.toString})")
 
 class IntType(val varName: String) extends ScalarType with PolyExpr[IntType] {
     override val typeName: String = "int"
@@ -64,7 +64,7 @@ class IntType(val varName: String) extends ScalarType with PolyExpr[IntType] {
     override def statementsAtFuncBegin: Set[Vector[Statement]] = Set()
 }
 
-implicit def intConst(i: Int): IntType = IntType(i.toString)
+implicit def intConst(i: Int): IntType = IntType(s"(${i.toString})")
 
 trait ArrayType[T <: ScalarType with NewInstance[T]] extends Type with Expr {
     val varName: String
@@ -96,6 +96,10 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
 
     private var _lowOffset = 0
 
+    private var _isStatic = false
+
+    def isStatic = _isStatic
+
     def lowOffset: Int = _lowOffset
 
     private var _highOffset = 0
@@ -108,6 +112,7 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
 
     def createStaticArray(low: Int, high: Int): OneDimFloatArrayType = {
         val res = OneDimFloatArrayType(TemporaryName())(size)
+        res._isStatic = true
         res._lowOffset = low
         res._highOffset = high
         res._statementsAtFuncBegin.addOne(
@@ -124,20 +129,24 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
 
     override def newBaseTypeInstance: FloatType = FloatType(TemporaryName())
 
-    def apply(index: PolyExpr[IntType]): ArrayAccess[FloatType] = ArrayAccess(this, index)
+    def apply(index: PolyExpr[IntType]): ArrayAccess[FloatType] = ArrayAccess(this, index % Index.blockDim.x - lowOffset)
 
     def map(f: PolyExpr[FloatType] => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
-        val element = this (Index.idx)
+        val idx = if (isStatic) Index.threadIdx.x - lowOffset else Index.idx
+        val element = this (idx)
         TmpOneDimFloatArrayType(f(element))(size)(Index.idx)(statementsAtFuncBegin)
     }
 
     def zipWith(other: OneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
-        TmpOneDimFloatArrayType(f(this (Index.idx), other(Index.idx)))(size)(Index.idx)(
+        val idx = if (isStatic) Index.threadIdx.x - lowOffset else Index.idx
+        val otherIdx = if (other.isStatic) Index.threadIdx.x - other.lowOffset else Index.idx
+        TmpOneDimFloatArrayType(f(this (idx), other(otherIdx)))(size)(Index.idx)(
             statementsAtFuncBegin)
     }
 
     def zipWith(other: TmpOneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
-        TmpOneDimFloatArrayType(f(this (Index.idx), other.element))(size)(Index.idx)(
+        val idx = if (isStatic) Index.threadIdx.x - lowOffset else Index.idx
+        TmpOneDimFloatArrayType(f(this (idx), other.element))(size)(Index.idx)(
             statementsAtFuncBegin)
     }
 
@@ -149,6 +158,8 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
 
     def /(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ / _)
 
+    def %(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ % _)
+
     def +(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ + _)
 
     def -(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ - _)
@@ -156,6 +167,8 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
     def *(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ * _)
 
     def /(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ / _)
+
+    def %(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ % _)
 
     def unary_+ : OneDimFloatArrayType = this
 
@@ -168,6 +181,8 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
     def *(other: FloatType): TmpOneDimFloatArrayType = map(_ * other)
 
     def /(other: FloatType): TmpOneDimFloatArrayType = map(_ / other)
+
+    def %(other: FloatType): TmpOneDimFloatArrayType = map(_ % other)
 }
 
 class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntType)(val index: PolyExpr[IntType])(_statementsAtFuncBegin: Set[Vector[Statement]]) extends ArrayType[FloatType] {
@@ -190,7 +205,8 @@ class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntTyp
         TmpOneDimFloatArrayType(f(element))(size)(index)(statementsAtFuncBegin)
 
     def zipWith(other: OneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
-        TmpOneDimFloatArrayType(f(element, other(Index.idx)))(size)(index)(statementsAtFuncBegin)
+        val idx = if (other.isStatic) Index.threadIdx.x - other.lowOffset else Index.idx
+        TmpOneDimFloatArrayType(f(element, other(idx)))(size)(index)(statementsAtFuncBegin)
     }
 
     def zipWith(other: TmpOneDimFloatArrayType)(f: (PolyExpr[FloatType], PolyExpr[FloatType]) => PolyExpr[FloatType]): TmpOneDimFloatArrayType = {
@@ -205,6 +221,8 @@ class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntTyp
 
     def /(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ / _)
 
+    def %(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ % _)
+
     def +(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ + _)
 
     def -(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ - _)
@@ -212,6 +230,8 @@ class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntTyp
     def *(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ * _)
 
     def /(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ / _)
+
+    def %(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ % _)
 
     def unary_+ : TmpOneDimFloatArrayType = this
 
@@ -224,6 +244,8 @@ class TmpOneDimFloatArrayType(val element: PolyExpr[FloatType])(val size: IntTyp
     def *(other: FloatType): TmpOneDimFloatArrayType = map(_ * other)
 
     def /(other: FloatType): TmpOneDimFloatArrayType = map(_ / other)
+
+    def %(other: FloatType): TmpOneDimFloatArrayType = map(_ / other)
 }
 
 extension (f: FloatType) {
@@ -231,8 +253,10 @@ extension (f: FloatType) {
     def -(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f - _)
     def *(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f * _)
     def /(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f / _)
+    def %(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f % _)
     def +(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f + _)
     def -(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f - _)
     def *(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f * _)
     def /(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f / _)
+    def %(other: TmpOneDimFloatArrayType): TmpOneDimFloatArrayType = other.map(f % _)
 }

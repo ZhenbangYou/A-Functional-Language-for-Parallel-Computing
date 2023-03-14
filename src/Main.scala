@@ -80,7 +80,7 @@
     )
     val x2 = x.createStaticArray(-1, 1)
     println(
-        GlobalFunc("shift")(x) {
+        GlobalFunc("blur")(x) {
             x2.map(y => (x2(Index.idx - 1) + x2(Index.idx) + x2(Index.idx + 1)) / 3)
         }
     )

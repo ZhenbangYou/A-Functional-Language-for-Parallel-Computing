@@ -22,6 +22,8 @@ trait PolyExpr[T <: Type] extends Expr with NewInstance[T] {
 
     def /(other: PolyExpr[T]): Div[T] = Div(this, other)
 
+    def %(other: PolyExpr[T]): Mod[T] = Mod(this, other)
+
     def unary_- : Neg[T] = Neg(this)
 
     def unary_+ : PolyExpr[T] = this
@@ -125,6 +127,29 @@ case class Div[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
     override def genStatements: Vector[Statement] =
         srcA.genStatements ++ srcB.genStatements ++ Vector(
             InitializedDeclaration(result, Div(srcA.getResult.asInstanceOf[PolyExpr[T]], srcB.getResult.asInstanceOf[PolyExpr[T]]))
+        )
+
+    override def getResult: T = result
+
+    override val conditions: Set[BoolExpr] = srcA.conditions | srcB.conditions
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
+}
+
+case class Mod[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
+    override def codeGen: String = s"(${srcA.codeGen} % ${srcB.codeGen})"
+
+    override val typeName: String = srcA.typeName
+    override val refTypeName: String = srcA.refTypeName
+
+    override def newInstance: T = srcA.newInstance
+
+    private val result = srcA.newInstance
+
+    override def genStatements: Vector[Statement] =
+        srcA.genStatements ++ srcB.genStatements ++ Vector(
+            InitializedDeclaration(result, Mod(srcA.getResult.asInstanceOf[PolyExpr[T]], srcB.getResult.asInstanceOf[PolyExpr[T]]))
         )
 
     override def getResult: T = result
