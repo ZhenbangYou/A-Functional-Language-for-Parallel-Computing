@@ -232,15 +232,16 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
             InitializedDeclaration(i, 1),
             i < Index.blockDim.x,
             Assignment(i, i * 2)
-        ) {
+        )({
             val idx = Index.threadIdx.x
             val tmpSum = FloatType("tmpSum")
             IfThen(idx + i < Index.blockDim.x)(
                 InitializedDeclaration(tmpSum, sharedArray.getWithoutBoundCheck(idx) +
                     sharedArray.getWithoutBoundCheck(idx + i)),
-                ArrayStoreWithoutBoundCheck(sharedArray, idx, tmpSum)
-            )
-        }
+                ArrayStoreWithoutBoundCheck(sharedArray, idx, tmpSum))
+        },
+            SyncThreads()
+        )
 
         // store
         val res = OneDimFloatArrayType("result")(Index.gridDim.x)
