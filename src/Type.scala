@@ -41,6 +41,40 @@ case class UnitType(statementsAtFuncBegin: Set[Vector[Statement]], prevStatement
     override def globalFuncRet: String = ""
 
     override def deviceFuncRet: String = ""
+
+    override def +(other: PolyExpr[UnitType]): Add[UnitType] =
+        throw Exception("Unit type does not support operation!")
+
+    override def -(other: PolyExpr[UnitType]): Sub[UnitType] =
+        throw Exception("Unit type does not support operation!")
+
+    override def *(other: PolyExpr[UnitType]): Mul[UnitType] =
+        throw Exception("Unit type does not support operation!")
+
+    override def /(other: PolyExpr[UnitType]): Div[UnitType] =
+        throw Exception("Unit type does not support operation!")
+
+    override def %(other: PolyExpr[UnitType]): Mod[UnitType] =
+        throw Exception("Unit type does not support operation!")
+
+    override def unary_- : Neg[UnitType] =
+        throw Exception("Unit type does not support operation!")
+
+    override def unary_+ : PolyExpr[UnitType] =
+        throw Exception("Unit type does not support operation!")
+
+    override def ==(other: PolyExpr[UnitType]): EQ[UnitType] =
+        throw Exception("Unit type does not support operation!")
+
+    override def !=(other: PolyExpr[UnitType]): NE[UnitType] = throw Exception("Unit type does not support operation!")
+
+    override def <(other: PolyExpr[UnitType]): LT[UnitType] = throw Exception("Unit type does not support operation!")
+
+    override def <=(other: PolyExpr[UnitType]): LE[UnitType] = throw Exception("Unit type does not support operation!")
+
+    override def >(other: PolyExpr[UnitType]): GT[UnitType] = throw Exception("Unit type does not support operation!")
+
+    override def >=(other: PolyExpr[UnitType]): GE[UnitType] = throw Exception("Unit type does not support operation!")
 }
 
 trait ScalarType extends Type
