@@ -43,6 +43,10 @@ trait PolyExpr[T <: Type] extends Expr with NewInstance[T] {
     def genStatements: Vector[Statement]
 
     def getResult: T
+
+    def globalFuncRet: String
+
+    def deviceFuncRet: String
 }
 
 case class Add[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -66,6 +70,10 @@ case class Add[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
 
     override val statementsAtFuncBegin: Set[Vector[Statement]] =
         srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
+
+    override def globalFuncRet: String = s"*result = $getResult;\n"
+
+    override def deviceFuncRet: String = s"return $getResult;\n"
 }
 
 case class Sub[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -89,6 +97,10 @@ case class Sub[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
 
     override val statementsAtFuncBegin: Set[Vector[Statement]] =
         srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
+
+    override def globalFuncRet: String = s"*result = $getResult;\n"
+
+    override def deviceFuncRet: String = s"return $getResult;\n"
 }
 
 case class Mul[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -112,6 +124,10 @@ case class Mul[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
 
     override val statementsAtFuncBegin: Set[Vector[Statement]] =
         srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
+
+    override def globalFuncRet: String = s"*result = $getResult;\n"
+
+    override def deviceFuncRet: String = s"return $getResult;\n"
 }
 
 case class Div[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -135,6 +151,10 @@ case class Div[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
 
     override val statementsAtFuncBegin: Set[Vector[Statement]] =
         srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
+
+    override def globalFuncRet: String = s"*result = $getResult;\n"
+
+    override def deviceFuncRet: String = s"return $getResult;\n"
 }
 
 case class Mod[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr[T] {
@@ -158,6 +178,10 @@ case class Mod[T <: Type](srcA: PolyExpr[T], srcB: PolyExpr[T]) extends PolyExpr
 
     override val statementsAtFuncBegin: Set[Vector[Statement]] =
         srcA.statementsAtFuncBegin | srcB.statementsAtFuncBegin
+
+    override def globalFuncRet: String = s"*result = $getResult;\n"
+
+    override def deviceFuncRet: String = s"return $getResult;\n"
 }
 
 case class Neg[T <: Type](srcA: PolyExpr[T]) extends PolyExpr[T] {
@@ -181,6 +205,10 @@ case class Neg[T <: Type](srcA: PolyExpr[T]) extends PolyExpr[T] {
 
     override val statementsAtFuncBegin: Set[Vector[Statement]] =
         srcA.statementsAtFuncBegin
+
+    override def globalFuncRet: String = s"*result = $getResult;\n"
+
+    override def deviceFuncRet: String = s"return $getResult;\n"
 }
 
 case class ArrayAccess[T <: ScalarType with NewInstance[T]](array: ArrayType[T], index: PolyExpr[IntType]) extends PolyExpr[T] {
@@ -207,7 +235,70 @@ case class ArrayAccess[T <: ScalarType with NewInstance[T]](array: ArrayType[T],
 
     override val statementsAtFuncBegin: Set[Vector[Statement]] =
         array.statementsAtFuncBegin | index.statementsAtFuncBegin
+
+    override def globalFuncRet: String = s"*result = $getResult;\n"
+
+    override def deviceFuncRet: String = s"return $getResult;\n"
 }
+
+case class ArrayAccessWithoutBoundCheck[T <: ScalarType with NewInstance[T]](array: ArrayType[T], index: PolyExpr[IntType]) extends PolyExpr[T] {
+    def codeGen: String = s"${array.varName}[${index.codeGen}]"
+
+    override val typeName: String = array.baseTypeName
+    override val refTypeName: String = s"$typeName*"
+
+    override def newInstance: T = array.newBaseTypeInstance
+
+    private val result = array.newBaseTypeInstance
+
+    override def genStatements: Vector[Statement] =
+        index.genStatements ++ Vector(
+            InitializedDeclaration(result, array(index.getResult))
+        )
+
+    override def getResult: T = result
+
+    override val conditions: Set[BoolExpr] = index.conditions + (index < array.size)
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        array.statementsAtFuncBegin | index.statementsAtFuncBegin
+
+    override def globalFuncRet: String = s"*result = $getResult;\n"
+
+    override def deviceFuncRet: String = s"return $getResult;\n"
+}
+
+case class TmpArrayAccess[T <: ScalarType with NewInstance[T]](array: TmpArrayType[T]) extends PolyExpr[T] {
+    override def codeGen: String = array.element.codeGen
+
+    override val typeName: String = array.baseTypeName
+    override val refTypeName: String = s"$typeName*"
+
+    override def newInstance: T = array.newBaseTypeInstance
+
+    private val result = array.newBaseTypeInstance
+
+    override def genStatements: Vector[Statement] = {
+        val stmts = array.element.genStatements :+ Assignment(result, array.element.getResult.asInstanceOf[PolyExpr[T]])
+        Vector(
+            Declaration(result),
+            IfThen(array.index < array.size)(stmts: _*)
+        )
+    }
+
+    override def getResult: T = result
+
+    override val conditions: Set[BoolExpr] = Set(array.index < array.size)
+
+    override val statementsAtFuncBegin: Set[Vector[Statement]] =
+        array.statementsAtFuncBegin | array.index.statementsAtFuncBegin
+
+    override def globalFuncRet: String = s"result[${Index.idx.varName}] = $getResult;\n"
+
+    override def deviceFuncRet: String = s"return $getResult;\n"
+}
+
+implicit def tmpArray(t: TmpOneDimFloatArrayType): TmpArrayAccess[FloatType] = TmpArrayAccess(t)
 
 case class FunctionApplication[T <: Type](fn: DeviceFunc[T], args: Expr*) extends PolyExpr[T] {
     override def codeGen: String = {
@@ -235,6 +326,10 @@ case class FunctionApplication[T <: Type](fn: DeviceFunc[T], args: Expr*) extend
 
     override val statementsAtFuncBegin: Set[Vector[Statement]] =
         args.map(_.statementsAtFuncBegin).fold(Set())(_ ++ _)
+
+    override def globalFuncRet: String = s"*result = $getResult;\n"
+
+    override def deviceFuncRet: String = s"return $getResult;\n"
 }
 
 trait BoolExpr extends Expr {
@@ -355,32 +450,8 @@ case class If[T <: Type](cond: BoolExpr)(val thenBody: PolyExpr[T])(val elseBody
 
     override val statementsAtFuncBegin: Set[Vector[Statement]] =
         thenBody.statementsAtFuncBegin | elseBody.statementsAtFuncBegin
+
+    override def globalFuncRet: String = s"*result = $getResult;\n"
+
+    override def deviceFuncRet: String = s"return $getResult;\n"
 }
-
-case class TmpArrayAccess[T <: ScalarType with NewInstance[T]](array: TmpArrayType[T]) extends PolyExpr[T] {
-    override def codeGen: String = array.element.codeGen
-
-    override val typeName: String = array.baseTypeName
-    override val refTypeName: String = s"$typeName*"
-
-    override def newInstance: T = array.newBaseTypeInstance
-
-    private val result = array.newBaseTypeInstance
-
-    override def genStatements: Vector[Statement] = {
-        val stmts = array.element.genStatements :+ Assignment(result, array.element.getResult.asInstanceOf[PolyExpr[T]])
-        Vector(
-            Declaration(result),
-            IfThen(array.index < array.size)(stmts: _*)
-        )
-    }
-
-    override def getResult: T = result
-
-    override val conditions: Set[BoolExpr] = Set(array.index < array.size)
-
-    override val statementsAtFuncBegin: Set[Vector[Statement]] =
-        array.statementsAtFuncBegin | array.index.statementsAtFuncBegin
-}
-
-implicit def tmpArray(t: TmpOneDimFloatArrayType): TmpArrayAccess[FloatType] = TmpArrayAccess(t)

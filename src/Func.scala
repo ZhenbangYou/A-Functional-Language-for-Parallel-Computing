@@ -18,7 +18,7 @@ case class GlobalFunc[T <: Type](name: String)(args: Type*)(body: PolyExpr[T]) e
                |\t${Index.defineIdx.codeGen.stripTrailing}
                |${statementsAtFuncBegin.stripTrailing}
                |${statements2String(body.genStatements, "\t").stripTrailing}
-               |\t$resultAddress = ${body.getResult.varName};
+               |\t${body.globalFuncRet.stripTrailing}
                |}""".stripMargin
         else {
             val cond = body.conditions.map(_.codeGen).reduce((a, b) => a + " && " + b)
@@ -27,7 +27,7 @@ case class GlobalFunc[T <: Type](name: String)(args: Type*)(body: PolyExpr[T]) e
                |${statementsAtFuncBegin.stripTrailing}
                |${statements2String(body.genStatements, "\t").stripTrailing}
                |\tif $cond {
-               |\t\t$resultAddress = ${body.getResult.varName};
+               |\t\t${body.globalFuncRet.stripTrailing}
                |\t}
                |}""".stripMargin
         }
@@ -45,7 +45,7 @@ case class DeviceFunc[T <: Type](name: String)(val args: Type*)(val body: PolyEx
            |\t${Index.defineIdx.codeGen.stripTrailing}
            |${statementsAtFuncBegin.stripTrailing}
            |${statements2String(body.genStatements, "\t").stripTrailing}
-           |\treturn ${body.getResult.varName};
+           |\t${body.deviceFuncRet.stripTrailing}
            |}""".stripMargin
     }
 

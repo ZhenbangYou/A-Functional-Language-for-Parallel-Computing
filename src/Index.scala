@@ -30,4 +30,6 @@ object Index {
     val idx: IntType = IntType(IDX_NAME)
 
     def defineIdx: InitializedDeclaration[IntType] = InitializedDeclaration(idx, idxExpr)
+
+    val lanes: PolyExpr[IntType] = gridDim.x * blockDim.x
 }

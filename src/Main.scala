@@ -92,5 +92,8 @@
             x.map(y => fn(x2, x2))
         }
     )
+    println(GlobalFunc("reduce")(x) {
+        x.reduceInBlock(_ + _)
+    })
 }
 
