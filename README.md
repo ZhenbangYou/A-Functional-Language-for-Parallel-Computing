@@ -50,6 +50,7 @@ I will keep updating this project even after the winter quarter of 2023.
    - Wide intra-block dependencies are not hard, since previous results can be kept in shared memory. In this case, although `__syncthreads()` is required, we can still put all the code within the same function.
    - Wide inter-block dependencies are truly hard to manage automatically. To wait for all blocks to finish a stage of computation, a function call is required because there is no primitive to synchronize all blocks. Newly allocated memory is also required to hold intermediate result. At the moment, I understand why *Triton* asks the user to manually manage inter-block dependencies.
 5. Some CUDA threads should do nothing because they are out of bound, e.g., an array has only 31 elements but 32 (equal to warp size) CUDA threads are used.
+6. Each CUDA thread can be responsible for the computation of multiple elements in an array, which requires a for loop, and it is even harder in terms of the size of shared memory we need to allocate for this array..
 
 ## Requirements
 Scala 3 (no other dependency required)
