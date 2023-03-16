@@ -54,3 +54,4 @@ I will keep updating this project even after the winter quarter of 2023.
 
 ## Requirements
 Scala 3 (no other dependency required)
+  - Scala 3.2.2 is used in the development
