@@ -16,13 +16,9 @@ sealed trait Type extends Typable {
     def defName: String // name in variable definition, zero initialization
 }
 
-case class UnitType(statementsAtFuncBegin: Set[Vector[Statement]], prevStatements: Vector[Statement])
+case class UnitType(statementsAtFuncBegin: Set[Vector[Statement]], prevStatements: Vector[Statement], typeName: String, refTypeName: String)
     extends Type with PolyExpr[UnitType] {
     override val varName: String = ""
-
-    override val typeName: String = ""
-
-    override val refTypeName: String = ""
 
     override def argsName: List[String] = throw Exception("Unit type should not appear in arguments!")
 
@@ -194,7 +190,8 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
         )
         res._statementsAtFuncBegin.addOne({
             val i = IntType("i")
-            val body = this (i).genStatements :+ ArrayStoreWithoutBoundCheck(res, Index.idx, this (i).getResult)
+            val element = this (i)
+            val body = element.genStatements :+ ArrayStoreWithoutBoundCheck(res, Index.idx, element.getResult)
             ForLoop(InitializedDeclaration(i, res.lowOffset + Index.idx),
                 i < res.highOffset + res.size, Assignment(i, i + Index.lanes))(body: _*)
         })
@@ -253,7 +250,7 @@ class OneDimFloatArrayType(val varName: String)(val size: IntType) extends Array
             reductionLoop,
             dec,
             storeStmt
-        ))
+        ), "float", "float*")
     }
 
     def +(other: OneDimFloatArrayType): TmpOneDimFloatArrayType = zipWith(other)(_ + _)

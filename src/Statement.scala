@@ -19,7 +19,7 @@ case class Declaration[T <: Type](variable: T) extends Statement {
 
 case class DeclareStaticArray[T <: ScalarType with NewInstance[T]](array: ArrayType[T], low: Int, high: Int) extends Statement {
     override def codeGen: String =
-        s"__static__ ${array.varName}[${Constants.WARP_SIZE + high - low}];\n"
+        s"__shared__ ${array.baseTypeName} ${array.varName}[${Constants.WARP_SIZE + high - low}];\n"
 }
 
 case class InitializedDeclaration[T <: Type](variable: T, initVal: PolyExpr[T]) extends Statement {
