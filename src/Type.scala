@@ -16,7 +16,10 @@ sealed trait Type extends Typable {
     def defName: String // name in variable definition, zero initialization
 }
 
-case class UnitType(statementsAtFuncBegin: Set[Vector[Statement]], prevStatements: Vector[Statement], typeName: String, refTypeName: String)
+case class UnitType(statementsAtFuncBegin: Set[Vector[Statement]],
+                    prevStatements: Vector[Statement],
+                    typeName: String,
+                    refTypeName: String)
     extends Type with PolyExpr[UnitType] {
     override val varName: String = ""
 

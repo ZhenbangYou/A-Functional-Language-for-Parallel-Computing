@@ -12,28 +12,6 @@
             a * b + c
         }
     )
-    val d = FloatType("d")
-    println(a * b + c / d - (-a))
-    println((a < b && d != c).codeGen)
-    println(GlobalFunc("add")(a, b)(a + b))
-    println(DeviceFunc("add")(a, b)(a + b))
-    println(GlobalFunc("idx")()(Index.idx))
-    println(DeviceFunc("idx")()(Index.idx))
-    val arr = OneDimFloatArrayType("arr")(IntType("n"))
-    println(DeviceFunc("access")(arr)(arr(Index.idx)))
-    println(GlobalFunc("inc")(a)(a + 1))
-    val i = IntType("i")
-    println(DeviceFunc("inc")(i)(i + 1))
-    println(DeviceFunc("branch")(i, a, b)(If(i < Index.idx) {
-        a
-    } {
-        b
-    }))
-    println(GlobalFunc("branch")(i, a, b)(If(i < Index.idx) {
-        a
-    } {
-        b
-    }))
     val n = IntType("n")
     val alpha = FloatType("alpha")
     val x = OneDimFloatArrayType("x")(n)
@@ -41,11 +19,6 @@
     println(
         GlobalFunc("saxpy")(alpha, x, y) {
             alpha * x + y
-        }
-    )
-    println(
-        GlobalFunc("saxpy")(alpha, x, y) {
-            x.zipWith(y)((xx, yy) => alpha * xx + yy)
         }
     )
     val x2 = x.createStaticArray(-1, 1)
@@ -78,15 +51,3 @@
         }
     )
 }
-
-trait ICloneable[T] {
-    def myClone(): T
-}
-
-trait Base extends ICloneable[Base]
-
-class Derived extends Base {
-    override def myClone(): Derived = Derived()
-}
-
-def getNewCopy[T <: Base](arg: T): T = arg.myClone().asInstanceOf[T]

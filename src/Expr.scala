@@ -279,11 +279,9 @@ case class TmpArrayAccess[T <: ScalarType with NewInstance[T]](array: TmpArrayTy
     private val result = array.newBaseTypeInstance
 
     override def genStatements: Vector[Statement] = {
-        val stmts = array.element.genStatements :+ Assignment(result, array.element.getResult.asInstanceOf[PolyExpr[T]])
-        Vector(
-            Declaration(result),
-            IfThen(array.index < array.size)(stmts: _*)
-        )
+        val stmts = array.element.genStatements :+
+            InitializedDeclaration(result, array.element.getResult.asInstanceOf[PolyExpr[T]])
+        Vector(stmts: _*)
     }
 
     override def getResult: T = result
@@ -424,7 +422,7 @@ case class Not(srcA: BoolExpr) extends BoolExpr {
         srcA.statementsAtFuncBegin
 }
 
-case class If[T <: Type](cond: BoolExpr)(val thenBody: PolyExpr[T])(val elseBody: PolyExpr[T]) extends PolyExpr[T] {
+case class Ternary[T <: Type](cond: BoolExpr)(val thenBody: PolyExpr[T])(val elseBody: PolyExpr[T]) extends PolyExpr[T] {
     override val typeName: String = thenBody.typeName
     override val refTypeName: String = thenBody.refTypeName
 
