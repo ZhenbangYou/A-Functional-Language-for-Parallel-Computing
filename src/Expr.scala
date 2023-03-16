@@ -224,9 +224,13 @@ case class ArrayAccess[T <: ScalarType with NewInstance[T]](array: ArrayType[T],
     override def genStatements: Vector[Statement] =
         index.genStatements ++ Vector(
             Declaration(result),
-            IfThen(index.getResult < array.size) {
+            if ((index eq Index.idx) || (index eq Index.threadIdx.x)) IfThen(index.getResult < array.size) {
                 Assignment(result, array(index.getResult))
             }
+            else
+                IfThen(0 <= index.getResult && index.getResult < array.size) {
+                    Assignment(result, array(index.getResult))
+                }
         )
 
     override def getResult: T = result
