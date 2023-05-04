@@ -31,7 +31,7 @@ I will keep updating this project even after the winter quarter of 2023.
 ## Related Work
 ### Industrial Strength
 1. CUDA Thrust (https://docs.nvidia.com/cuda/thrust/): performant, hard to use
-2. OpenAI Triton (https://openai.com/research/triton): not functional enough, still too imperative
+2. OpenAI Triton (https://openai.com/research/triton): not functional enough, still too imperative (even pointer arithmetic exists)
    - Triton: An Intermediate Language and Compiler for Tiled Neural Network Computations (https://www.eecs.harvard.edu/~htk/publication/2019-mapl-tillet-kung-cox.pdf)
 3. Scala Parallel Collections (https://docs.scala-lang.org/overviews/parallel-collections/overview.html): easy to use, only supporting CPU multithreading
 4. Julia with GPU:
